@@ -29,6 +29,12 @@
     },
     {
       "path": "./blockchain-service"
+    },
+    {
+      "path": "./results-service-e2e"
+    },
+    {
+      "path": "./results-service"
     }
   ]
 }
