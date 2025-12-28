@@ -23,6 +23,12 @@
     },
     {
       "path": "./voting-service"
+    },
+    {
+      "path": "./blockchain-service-e2e"
+    },
+    {
+      "path": "./blockchain-service"
     }
   ]
 }
