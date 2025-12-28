@@ -8,6 +8,15 @@
     },
     {
       "path": "./api-gateway"
+    },
+    {
+      "path": "./auth-service-e2e"
+    },
+    {
+      "path": "./auth-service"
+    },
+    {
+      "path": "./libs/contracts"
     }
   ]
 }
