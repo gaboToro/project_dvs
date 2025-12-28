@@ -56,7 +56,11 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["api-gateway-e2e/**/*", "auth-service-e2e/**/*"]
+      "exclude": [
+        "api-gateway-e2e/**/*",
+        "auth-service-e2e/**/*",
+        "voting-service-e2e/**/*"
+      ]
     },
     {
       "plugin": "@nx/js/typescript",
