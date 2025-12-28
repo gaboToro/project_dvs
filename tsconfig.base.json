@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@org/contracts": ["libs/contracts/src/index.ts"]
+    },
+
     "composite": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
