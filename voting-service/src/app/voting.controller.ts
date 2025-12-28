@@ -1,19 +1,18 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Headers,
-  Post,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Headers, Post, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { CastVoteRequestDto, VoteCastEvent } from '@org/contracts';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { ServiceUnavailableException } from '@nestjs/common';
 
 @Controller('votes')
 export class VotingController {
   private readonly votedUsers = new Set<string>();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly http: HttpService,
+  ) { }
 
   @Post()
   async castVote(
@@ -46,8 +45,6 @@ export class VotingController {
       throw new BadRequestException('User has already voted');
     }
 
-    this.votedUsers.add(voterId);
-
     const event: VoteCastEvent = {
       voterId,
       electionId: body.electionId,
@@ -58,6 +55,30 @@ export class VotingController {
     // Fase 3: esto irá a Kafka.
     console.log('VoteCast event:', event);
 
-    return { ok: true, message: 'Vote registered', event };
+    const baseUrl = process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003';
+
+    try {
+      const res = await firstValueFrom(
+        this.http.post(`${baseUrl}/api/chain/add`, event, {
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+
+      // ✅ Solo confirmamos el voto cuando blockchain lo ancla
+      this.votedUsers.add(voterId);
+
+      return {
+        ok: true,
+        message: 'Vote registered and anchored to blockchain',
+        event,
+        blockchain: res.data,
+      };
+    } catch (e: any) {
+      // ✅ Rechazar si blockchain falla
+      const reason = e?.code ?? e?.message ?? 'unknown error';
+      throw new ServiceUnavailableException(
+        `Blockchain service unavailable: ${reason}`,
+      );
+    }
   }
 }
