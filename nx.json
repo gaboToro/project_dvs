@@ -60,7 +60,8 @@
         "api-gateway-e2e/**/*",
         "auth-service-e2e/**/*",
         "voting-service-e2e/**/*",
-        "blockchain-service-e2e/**/*"
+        "blockchain-service-e2e/**/*",
+        "results-service-e2e/**/*"
       ]
     },
     {
