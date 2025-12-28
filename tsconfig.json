@@ -17,6 +17,12 @@
     },
     {
       "path": "./libs/contracts"
+    },
+    {
+      "path": "./voting-service-e2e"
+    },
+    {
+      "path": "./voting-service"
     }
   ]
 }

@@ -44,7 +44,9 @@
     "libs",
     "contracts",
     "auth-service",
-    "auth-service-e2e"
+    "auth-service-e2e",
+    "voting-service",
+    "voting-service-e2e"
   ],
   "dependencies": {
     "@nestjs/common": "^11.0.0",
