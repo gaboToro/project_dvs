@@ -46,15 +46,18 @@
     "auth-service",
     "auth-service-e2e",
     "voting-service",
-    "voting-service-e2e"
+    "voting-service-e2e",
+    "blockchain-service",
+    "blockchain-service-e2e"
   ],
   "dependencies": {
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
-    "axios": "^1.6.0",
+    "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
