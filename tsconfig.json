@@ -35,6 +35,12 @@
     },
     {
       "path": "./results-service"
+    },
+    {
+      "path": "./user-service-e2e"
+    },
+    {
+      "path": "./user-service"
     }
   ]
 }
