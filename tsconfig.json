@@ -41,6 +41,12 @@
     },
     {
       "path": "./user-service"
+    },
+    {
+      "path": "./election-service-e2e"
+    },
+    {
+      "path": "./election-service"
     }
   ]
 }

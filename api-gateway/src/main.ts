@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { authProxy, votingProxy, blockchainProxy, resultsProxy, usersProxy } from './app/proxy.middleware';
+import { authProxy, votingProxy, blockchainProxy, resultsProxy, usersProxy, electionProxy } from './app/proxy.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +13,7 @@ async function bootstrap() {
   app.use('/api/chain', blockchainProxy);
   app.use('/api/results', resultsProxy);
   app.use('/api/users', usersProxy);
+  app.use('/api/elections', electionProxy);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
