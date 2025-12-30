@@ -62,7 +62,8 @@
         "voting-service-e2e/**/*",
         "blockchain-service-e2e/**/*",
         "results-service-e2e/**/*",
-        "user-service-e2e/**/*"
+        "user-service-e2e/**/*",
+        "election-service-e2e/**/*"
       ]
     },
     {
