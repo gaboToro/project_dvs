@@ -9,12 +9,10 @@ describe('AppService', () => {
       providers: [AppService],
     }).compile();
 
-    service = app.get<AppService>(AppService);
+    service = app.get(AppService);
   });
 
-  describe('getData', () => {
-    it('should return "Hello API"', () => {
-      expect(service.getData()).toEqual({ message: 'Hello API' });
-    });
+  it('should return health payload', () => {
+    expect(service.health()).toEqual({ status: 'ok', service: 'election-service' });
   });
 });
