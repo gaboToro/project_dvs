@@ -1,18 +1,17 @@
-import {
-  Controller,
-  Get,
-  Headers,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Get, Headers, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly appService: AppService,
+  ) {}
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'api-gateway' };
+    return this.appService.getHealth();
   }
 
   @Get('me')
