@@ -47,3 +47,29 @@ test-output
 
 .env
 .vscode
+
+
+# Terraform
+# Archivos de configuración local de Terraform
+.terraform/
+
+# Archivos de estado (CONTIENEN SECRETOS Y DATOS SENSIBLES)
+*.tfstate
+*.tfstate.*
+
+# Archivos de variables (Suelen contener credenciales)
+*.tfvars
+*.tfvars.json
+
+# Archivos de log y override
+*.txt
+terraform.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Archivo de bloqueo de dependencias (.lock.hcl)
+# Nota: Algunos equipos prefieren subirlo para asegurar versiones, 
+# pero si estás aprendiendo o en laboratorios, puedes ignorarlo.
+.terraform.lock.hcl
