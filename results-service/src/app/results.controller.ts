@@ -1,38 +1,23 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import type { BlockDto } from '@org/contracts';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { getMongoDb } from './db/mongo';
 
 @Controller('results')
 export class ResultsController {
-  constructor(private readonly http: HttpService) {}
-
   @Get(':electionId')
   async byElection(@Param('electionId') electionId: string) {
-    const blockchainUrl =
-      process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003';
+    const db = await getMongoDb();
+    const collection = db.collection('election_results');
 
-    const res = await firstValueFrom(
-      this.http.get<BlockDto[]>(`${blockchainUrl}/api/chain`),
-    );
+    const doc = await collection.findOne({ electionId });
 
-    const chain = res.data ?? [];
-
-    // excluir génesis
-    const votes = chain
-      .filter((b) => b.index > 0)
-      .map((b) => b.data)
-      .filter((v) => v.electionId === electionId);
-
-    const counts: Record<string, number> = {};
-    for (const vote of votes) {
-      counts[vote.candidateId] = (counts[vote.candidateId] ?? 0) + 1;
+    if (!doc) {
+      throw new NotFoundException('No results for this election');
     }
 
     return {
-      electionId,
-      totalVotes: votes.length,
-      results: counts,
+      electionId: doc.electionId,
+      results: doc.results || {},
+      lastUpdatedAt: doc.lastUpdatedAt,
     };
   }
 }
