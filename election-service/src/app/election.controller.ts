@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, UnauthorizedException, ForbiddenException, Query } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { CreateCandidateRequestDto, CreateElectionRequestDto, UpdateElectionRequestDto } from '@org/contracts';
+import type { CreateCandidateRequestDto, CreateElectionRequestDto, UpdateElectionRequestDto, ElectionStatus } from '@org/contracts';
 import { ElectionService } from './election.service';
 
 function requireAdmin(payload: any) {
@@ -25,6 +25,17 @@ export class ElectionController {
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
+  }
+
+  @Get('health')
+  async health() {
+    await this.service.ping();
+    return { status: 'ok', service: 'election-service' };
+  }
+
+  @Get()
+  list(@Query('status') status?: ElectionStatus) {
+    return this.service.listElections(status);
   }
 
   // PUBLIC
