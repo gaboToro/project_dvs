@@ -1,6 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import type { CandidateDto, CreateCandidateRequestDto, CreateElectionRequestDto, ElectionDto, ElectionStatus, ElectionWithCandidatesDto, UpdateElectionRequestDto } from '@org/contracts';
 import { getSupabaseAdmin } from './supabase.client';
+
+const validStatuses = new Set<ElectionStatus>(['DRAFT', 'OPEN', 'CLOSED']);
 
 function mapElection(row: any): ElectionDto {
   return {
@@ -29,6 +31,30 @@ function mapCandidate(row: any): CandidateDto {
 export class ElectionService {
   private supabase = getSupabaseAdmin();
 
+  async ping(): Promise<void> {
+    const { error } = await this.supabase.from('elections').select('id').limit(1);
+    if (error) throw new ServiceUnavailableException(error.message);
+  }
+
+  async listElections(status?: ElectionStatus): Promise<ElectionDto[]> {
+    if (status && !validStatuses.has(status)) {
+      throw new BadRequestException('Invalid status');
+    }
+
+    let query = this.supabase
+      .from('elections')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new BadRequestException(error.message);
+    return (data ?? []).map(mapElection);
+  }
+
   async createElection(dto: CreateElectionRequestDto): Promise<ElectionDto> {
     if (new Date(dto.startsAt).getTime() >= new Date(dto.endsAt).getTime()) {
       throw new BadRequestException('startsAt must be < endsAt');
@@ -47,6 +73,7 @@ export class ElectionService {
       .single();
 
     if (error) throw new BadRequestException(error.message);
+    if (!data) throw new NotFoundException('Election not created');
     return mapElection(data);
   }
 
@@ -71,13 +98,16 @@ export class ElectionService {
       .select('*')
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Election not found');
+      throw new BadRequestException(error.message);
+    }
     if (!data) throw new NotFoundException('Election not found');
     return mapElection(data);
   }
 
   async addCandidate(electionId: string, dto: CreateCandidateRequestDto): Promise<CandidateDto> {
-    // asegurar que exista
+    // ensure election exists
     const election = await this.getElection(electionId);
 
     if (election.status === 'CLOSED') {
@@ -96,6 +126,7 @@ export class ElectionService {
       .single();
 
     if (error) throw new BadRequestException(error.message);
+    if (!data) throw new NotFoundException('Candidate not created');
     return mapCandidate(data);
   }
 
@@ -122,7 +153,11 @@ export class ElectionService {
       .eq('id', id)
       .single();
 
-    if (error) throw new NotFoundException(error.message);
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Election not found');
+      throw new NotFoundException(error.message);
+    }
+    if (!data) throw new NotFoundException('Election not found');
     return mapElection(data);
   }
 
@@ -175,13 +210,13 @@ export class ElectionService {
       throw new BadRequestException('There is already an OPEN election');
     }
 
-    // 2) validar fechas
+    // 2) validate dates
     const election = await this.getElectionWithCandidates(id);
     if (new Date(election.startsAt).getTime() >= new Date(election.endsAt).getTime()) {
       throw new BadRequestException('startsAt must be < endsAt');
     }
 
-    // 3) debe tener candidatos
+    // 3) must have candidates
     if (!election.candidates.length) {
       throw new BadRequestException('Cannot OPEN election without candidates');
     }
@@ -193,7 +228,11 @@ export class ElectionService {
       .select('*')
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Election not found');
+      throw new BadRequestException(error.message);
+    }
+    if (!data) throw new NotFoundException('Election not found');
     return { ok: true, electionId: data.id, status: data.status };
   }
 
@@ -205,7 +244,11 @@ export class ElectionService {
       .select('*')
       .single();
 
-    if (error) throw new BadRequestException(error.message);
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Election not found');
+      throw new BadRequestException(error.message);
+    }
+    if (!data) throw new NotFoundException('Election not found');
     return { ok: true, electionId: data.id, status: data.status };
   }
 }

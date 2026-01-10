@@ -4,6 +4,7 @@ import type { CastVoteRequestDto, VoteCastEvent } from '@org/contracts';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ServiceUnavailableException } from '@nestjs/common';
+import { publishVoteCast } from './mq/kafka.producer';
 
 @Controller('votes')
 export class VotingController {
@@ -12,7 +13,7 @@ export class VotingController {
   constructor(
     private readonly jwtService: JwtService,
     private readonly http: HttpService,
-  ) { }
+  ) {}
 
   @Post()
   async castVote(
@@ -52,9 +53,6 @@ export class VotingController {
       timestamp: Date.now(),
     };
 
-    // Fase 3: esto irá a Kafka.
-    console.log('VoteCast event:', event);
-
     const baseUrl = process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003';
 
     try {
@@ -64,8 +62,15 @@ export class VotingController {
         }),
       );
 
-      // ✅ Solo confirmamos el voto cuando blockchain lo ancla
+      // Confirm only when blockchain anchors the vote.
       this.votedUsers.add(voterId);
+
+      try {
+        await publishVoteCast(event);
+      } catch (kafkaError: any) {
+        const reason = kafkaError?.code ?? kafkaError?.message ?? 'unknown error';
+        console.warn(`Kafka publish failed: ${reason}`);
+      }
 
       return {
         ok: true,
@@ -74,7 +79,7 @@ export class VotingController {
         blockchain: res.data,
       };
     } catch (e: any) {
-      // ✅ Rechazar si blockchain falla
+      // Reject if blockchain fails.
       const reason = e?.code ?? e?.message ?? 'unknown error';
       throw new ServiceUnavailableException(
         `Blockchain service unavailable: ${reason}`,
