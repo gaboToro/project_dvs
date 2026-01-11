@@ -1,13 +1,15 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
-describe('api-gateway e2e', () => {
+describe('api-gateway functional', () => {
   let app: INestApplication;
   let baseUrl: string;
+  let jwt: JwtService;
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
-    const { AppModule } = require('../../../api-gateway/src/app/app.module');
+    const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -15,6 +17,8 @@ describe('api-gateway e2e', () => {
 
     app = moduleRef.createNestApplication();
     await app.listen(0);
+
+    jwt = moduleRef.get(JwtService);
 
     const address = app.getHttpServer().address();
     if (!address || typeof address === 'string') {
@@ -27,11 +31,23 @@ describe('api-gateway e2e', () => {
     await app.close();
   });
 
-  it('returns health payload', async () => {
+  it('responds to health', async () => {
     const res = await fetch(`${baseUrl}/health`);
-    const body = await res.json();
+    const body = (await res.json()) as { status: string; service: string };
 
     expect(res.status).toBe(200);
     expect(body).toEqual({ status: 'ok', service: 'api-gateway' });
+  });
+
+  it('returns payload for /me with valid token', async () => {
+    const token = await jwt.signAsync({ sub: 'admin', roles: ['admin'] });
+    const res = await fetch(`${baseUrl}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; user: { sub: string } };
+    expect(body.ok).toBe(true);
+    expect(body.user.sub).toBe('admin');
   });
 });

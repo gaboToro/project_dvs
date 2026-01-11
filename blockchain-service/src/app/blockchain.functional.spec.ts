@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
-import { AppModule } from '../../../results-service/src/app/app.module';
+import { AppModule } from './app.module';
 
-describe('results-service e2e', () => {
+describe('BlockchainService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
 
@@ -26,11 +26,22 @@ describe('results-service e2e', () => {
     await app.close();
   });
 
-  it('returns health payload', async () => {
-    const res = await fetch(`${baseUrl}/api/results/health`);
-    const body = await res.json();
+  it('adds and verifies chain', async () => {
+    const addRes = await fetch(`${baseUrl}/api/chain/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        voterId: 'v1',
+        electionId: 'e1',
+        candidateId: 'c1',
+        timestamp: Date.now(),
+      }),
+    });
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ status: 'ok', service: 'results-service' });
+    expect(addRes.ok).toBe(true);
+
+    const verifyRes = await fetch(`${baseUrl}/api/chain/verify`);
+    const body = (await verifyRes.json()) as { valid: boolean };
+    expect(body.valid).toBe(true);
   });
 });

@@ -1,13 +1,13 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 
-describe('auth-service e2e', () => {
+describe('AuthService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
-    const { AppModule } = require('../../../auth-service/src/app/app.module');
+    const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -28,11 +28,24 @@ describe('auth-service e2e', () => {
     await app.close();
   });
 
-  it('returns health payload', async () => {
-    const res = await fetch(`${baseUrl}/api/health`);
-    const body = await res.json();
+  it('responds to health', async () => {
+    const res = await fetch(`${baseUrl}/api/auth/health`);
+    const body = (await res.json()) as { status: string; service: string };
 
     expect(res.status).toBe(200);
     expect(body).toEqual({ status: 'ok', service: 'auth-service' });
+  });
+
+  it('logs in with admin credentials', async () => {
+    const res = await fetch(`${baseUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'admin', password: 'admin123' }),
+    });
+
+    expect(res.ok).toBe(true);
+    const body = (await res.json()) as { accessToken: string; tokenType: string };
+    expect(body.accessToken).toBeTruthy();
+    expect(body.tokenType).toBe('Bearer');
   });
 });
