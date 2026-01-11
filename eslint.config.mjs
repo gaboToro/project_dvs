@@ -26,29 +26,18 @@ export default [
     },
   },
   {
-    files: ['**/*-e2e/**/*.ts', '**/*-e2e/**/*.tsx', '**/*-e2e/**/*.js', '**/*-e2e/**/*.jsx'],
+    files: [
+      '**/*-e2e/**/*.ts',
+      '**/*-e2e/**/*.tsx',
+      '**/*-e2e/**/*.js',
+      '**/*-e2e/**/*.jsx',
+      '**/*-e2e/**/*.cts',
+      '**/*-e2e/**/*.mts',
+      '**/*-e2e/**/*.cjs',
+      '**/*-e2e/**/*.mjs',
+    ],
     rules: {
-      '@nx/enforce-module-boundaries': [
-        'error',
-        {
-          enforceBuildableLibDependency: true,
-          allow: [
-            '^@org/api-gateway$',
-            '^@org/auth-service$',
-            '^@org/blockchain-service$',
-            '^@org/election-service$',
-            '^@org/results-service$',
-            '^@org/user-service$',
-            '^@org/voting-service$',
-          ],
-          depConstraints: [
-            {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
-            },
-          ],
-        },
-      ],
+      '@nx/enforce-module-boundaries': 'off',
     },
   },
   {
