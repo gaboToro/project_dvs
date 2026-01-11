@@ -5,10 +5,14 @@ on:
     branches: [qa, main]
   push:
     branches: [qa, main]
+  workflow_dispatch:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: test-secret
+      NX_TERMINAL_UI: "false"
 
     steps:
       - name: Checkout
@@ -35,3 +39,41 @@ jobs:
 
       - name: Build
         run: npx nx run-many -t build --all
+
+  load-test:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: test-secret
+      NX_TERMINAL_UI: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start auth-service
+        run: npx nx serve auth-service &
+
+      - name: Wait for auth-service
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:3001/api/auth/health; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Load test auth-service
+        run: node tools/load/basic-load.js http://localhost:3001/api/auth/health
+
+      - name: Stop auth-service
+        if: always()
+        run: pkill -f "nx serve auth-service" || true

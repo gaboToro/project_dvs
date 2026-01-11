@@ -1,24 +1,46 @@
-# Digital Voting System (demo)
+# Digital Voting System
 
-This is an Nx monorepo with several NestJS microservices. The demo focuses on auth, voting, blockchain anchoring, and results aggregation.
+Nx monorepo of NestJS microservices for a digital voting demo. The system supports authentication, election management (Supabase), vote casting, blockchain anchoring, and results aggregation.
 
 ## Prerequisites
 - Node.js 18+
-- Docker Desktop (for Postgres, Mongo, Redis, Kafka, RabbitMQ)
+- Docker Desktop (Postgres, Mongo, Redis, Kafka, RabbitMQ)
+- Supabase project (for elections)
 
-## Quick start (demo)
+## Architecture overview
+- API Gateway routes traffic to services.
+- Auth issues JWT tokens (demo credentials).
+- Elections persist in Supabase.
+- Votes are anchored to an in-memory blockchain and published to Kafka.
+- Results service consumes Kafka and updates Mongo read model.
+
+## Services
+- api-gateway (3000)
+- auth-service (3001)
+- voting-service (3002)
+- blockchain-service (3003)
+- results-service (3004)
+- user-service (3005)
+- election-service (3006)
+
+## Setup
 1) Install dependencies
    - npm install
 
 2) Start infra dependencies
    - docker compose up -d
 
-3) Verify environment variables
-   - .env is already included for local demo.
+3) Configure environment variables
+   - .env is included for local demo.
+   - Update with your Supabase values:
+     - SUPABASE_URL
+     - SUPABASE_SERVICE_ROLE_KEY
    - Mongo credentials in .env match docker-compose (user: dvs_user, pass: dvs_pass_123).
-   - Supabase variables must be real and reachable (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).
 
-4) Start services (separate terminals)
+4) Apply Supabase migration
+   - Run `supabase/migrations/20251230065442_remote_schema.sql` in Supabase SQL Editor.
+
+5) Start services (separate terminals)
    - npx nx serve auth-service
    - npx nx serve user-service
    - npx nx serve blockchain-service
@@ -32,12 +54,21 @@ This is an Nx monorepo with several NestJS microservices. The demo focuses on au
    - POST http://localhost:3000/api/auth/login
    - Body: { "username": "admin", "password": "admin123" }
 
-2) Cast a vote
+2) Create election (admin token required)
+   - POST http://localhost:3000/api/elections
+
+3) Add candidate
+   - POST http://localhost:3000/api/elections/:id/candidates
+
+4) Open election
+   - POST http://localhost:3000/api/elections/:id/open
+
+5) Cast a vote
    - POST http://localhost:3000/api/votes
    - Header: Authorization: Bearer <accessToken>
    - Body: { "electionId": "demo-2025", "candidateId": "cand-001" }
 
-3) Read results (from Mongo)
+6) Read results
    - GET http://localhost:3000/api/results/demo-2025
 
 ## Elections (Supabase-backed)
@@ -52,16 +83,19 @@ This is an Nx monorepo with several NestJS microservices. The demo focuses on au
 - POST http://localhost:3000/api/elections/:id/candidates (admin)
 - DELETE http://localhost:3000/api/elections/:id/candidates/:candidateId (admin)
 
+## Testing
+### Unit + functional
+- Run all tests: `npm run test:all`
+- Functional tests start the Nest apps in-process and hit real HTTP routes.
+
+### Load testing (smoke)
+- Start services, then run: `npm run load:smoke`
+- Override parameters:
+  - `DURATION=20 CONCURRENCY=25 node tools/load/basic-load.js http://localhost:3000/api/auth/health`
+
+## CI/CD
+- GitHub Actions runs lint, tests, and build on PRs to `qa` and `main`.
+- Manual load test job available via workflow_dispatch.
+
 ## Notes
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
-- election-service uses Supabase and requires migrations in supabase/migrations.
-  Apply 20251230065442_remote_schema.sql to your Supabase project.
-
-## Ports (defaults)
-- api-gateway: 3000
-- auth-service: 3001
-- voting-service: 3002
-- blockchain-service: 3003
-- results-service: 3004
-- user-service: 3005
-- election-service: 3006

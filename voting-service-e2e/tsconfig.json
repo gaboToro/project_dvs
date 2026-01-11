@@ -2,10 +2,11 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "out-tsc/@org/voting-service-e2e",
+    "rootDir": "..",
     "esModuleInterop": true,
     "noUnusedLocals": false,
     "noImplicitAny": false
   },
-  "include": ["jest.config.ts", "src/**/*.ts"],
+  "include": ["jest.config.ts", "src/**/*.ts", "../voting-service/src/**/*.ts"],
   "references": []
 }

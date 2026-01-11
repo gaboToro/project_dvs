@@ -4,6 +4,10 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { of, throwError } from 'rxjs';
 
+jest.mock('./mq/kafka.producer', () => ({
+  publishVoteCast: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe('VotingController', () => {
   let controller: VotingController;
 

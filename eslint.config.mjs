@@ -27,6 +27,21 @@ export default [
   },
   {
     files: [
+      '**/*-e2e/**/*.ts',
+      '**/*-e2e/**/*.tsx',
+      '**/*-e2e/**/*.js',
+      '**/*-e2e/**/*.jsx',
+      '**/*-e2e/**/*.cts',
+      '**/*-e2e/**/*.mts',
+      '**/*-e2e/**/*.cjs',
+      '**/*-e2e/**/*.mjs',
+    ],
+    rules: {
+      '@nx/enforce-module-boundaries': 'off',
+    },
+  },
+  {
+    files: [
       '**/*.ts',
       '**/*.tsx',
       '**/*.cts',

@@ -3,6 +3,11 @@ import { getMongoDb } from './db/mongo';
 
 @Controller('results')
 export class ResultsController {
+  @Get('health')
+  health() {
+    return { status: 'ok', service: 'results-service' };
+  }
+
   @Get(':electionId')
   async byElection(@Param('electionId') electionId: string) {
     const db = await getMongoDb();

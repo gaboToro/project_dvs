@@ -2,10 +2,11 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "out-tsc/@org/results-service-e2e",
+    "rootDir": "..",
     "esModuleInterop": true,
     "noUnusedLocals": false,
     "noImplicitAny": false
   },
-  "include": ["jest.config.ts", "src/**/*.ts"],
+  "include": ["jest.config.ts", "src/**/*.ts", "../results-service/src/**/*.ts"],
   "references": []
 }

@@ -2,7 +2,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@org/contracts": ["libs/contracts/src/index.ts"]
+      "@org/contracts": ["libs/contracts/src/index.ts"],
+      "@org/api-gateway": ["api-gateway/src/index.ts"],
+      "@org/auth-service": ["auth-service/src/index.ts"],
+      "@org/blockchain-service": ["blockchain-service/src/index.ts"],
+      "@org/election-service": ["election-service/src/index.ts"],
+      "@org/results-service": ["results-service/src/index.ts"],
+      "@org/user-service": ["user-service/src/index.ts"],
+      "@org/voting-service": ["voting-service/src/index.ts"]
     },
 
     "composite": true,
