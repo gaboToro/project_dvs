@@ -21,7 +21,7 @@ jest.mock('../../../election-service/src/app/supabase.client', () => ({
   getSupabaseAdmin: () => mockSupabase,
 }));
 
-const { AppModule } = require('../../../election-service/src/app/app.module');
+const { AppModule } = require('@org/election-service');
 
 describe('election-service e2e', () => {
   let app: INestApplication;

@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
-import { AppModule } from '../../../blockchain-service/src/app/app.module';
+import { AppModule } from '@org/blockchain-service';
 
 describe('blockchain-service e2e', () => {
   let app: INestApplication;

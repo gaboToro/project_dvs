@@ -7,7 +7,7 @@ describe('api-gateway e2e', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
-    const { AppModule } = require('../../../api-gateway/src/app/app.module');
+    const { AppModule } = require('@org/api-gateway');
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],

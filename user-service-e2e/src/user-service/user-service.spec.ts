@@ -7,7 +7,7 @@ describe('user-service e2e', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
-    const { AppModule } = require('../../../user-service/src/app/app.module');
+    const { AppModule } = require('@org/user-service');
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],

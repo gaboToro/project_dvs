@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
-import { AppModule } from '../../../results-service/src/app/app.module';
+import { AppModule } from '@org/results-service';
 
 describe('results-service e2e', () => {
   let app: INestApplication;
