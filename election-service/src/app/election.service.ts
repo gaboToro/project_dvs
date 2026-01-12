@@ -146,6 +146,40 @@ export class ElectionService {
     return { ok: true };
   }
 
+  async updateCandidate(
+    electionId: string,
+    candidateId: string,
+    dto: { name?: string; plan?: string | null },
+  ): Promise<CandidateDto> {
+    const election = await this.getElection(electionId);
+    if (election.status === 'CLOSED') {
+      throw new BadRequestException('Cannot modify candidates on CLOSED election');
+    }
+
+    if (!dto.name && dto.plan === undefined) {
+      throw new BadRequestException('Candidate update payload empty');
+    }
+
+    const patch: any = {};
+    if (dto.name !== undefined) patch.name = dto.name;
+    if (dto.plan !== undefined) patch.plan = dto.plan ?? null;
+
+    const { data, error } = await this.supabase
+      .from('candidates')
+      .update(patch)
+      .eq('id', candidateId)
+      .eq('election_id', electionId)
+      .select('*')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Candidate not found');
+      throw new BadRequestException(error.message);
+    }
+    if (!data) throw new NotFoundException('Candidate not found');
+    return mapCandidate(data);
+  }
+
   async getElection(id: string): Promise<ElectionDto> {
     const { data, error } = await this.supabase
       .from('elections')
@@ -216,6 +250,14 @@ export class ElectionService {
       throw new BadRequestException('startsAt must be < endsAt');
     }
 
+    const now = Date.now();
+    if (now < new Date(election.startsAt).getTime()) {
+      throw new BadRequestException('Election not started yet');
+    }
+    if (now >= new Date(election.endsAt).getTime()) {
+      throw new BadRequestException('Election already ended');
+    }
+
     // 3) must have candidates
     if (!election.candidates.length) {
       throw new BadRequestException('Cannot OPEN election without candidates');
@@ -250,5 +292,93 @@ export class ElectionService {
     }
     if (!data) throw new NotFoundException('Election not found');
     return { ok: true, electionId: data.id, status: data.status };
+  }
+
+  async deleteElection(id: string): Promise<{ ok: true }> {
+    const election = await this.getElection(id);
+    if (election.status === 'OPEN') {
+      throw new BadRequestException('Cannot delete OPEN election');
+    }
+
+    const { error: candidatesError } = await this.supabase
+      .from('candidates')
+      .delete()
+      .eq('election_id', id);
+
+    if (candidatesError) throw new BadRequestException(candidatesError.message);
+
+    const { error } = await this.supabase
+      .from('elections')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      if (error.code === 'PGRST116') throw new NotFoundException('Election not found');
+      throw new BadRequestException(error.message);
+    }
+
+    return { ok: true };
+  }
+
+  async syncElectionWindows(): Promise<{ closedCount: number; openedId?: string }> {
+    const now = new Date().toISOString();
+
+    const { data: closed, error: closeErr } = await this.supabase
+      .from('elections')
+      .update({ status: 'CLOSED' })
+      .eq('status', 'OPEN')
+      .lte('ends_at', now)
+      .select('id');
+
+    if (closeErr) throw new BadRequestException(closeErr.message);
+    const closedCount = closed?.length ?? 0;
+
+    const { data: openList, error: openErr } = await this.supabase
+      .from('elections')
+      .select('id')
+      .eq('status', 'OPEN')
+      .limit(1);
+
+    if (openErr) throw new BadRequestException(openErr.message);
+    const hasOpen = (openList ?? []).length > 0;
+
+    if (hasOpen) {
+      return { closedCount };
+    }
+
+    const { data: candidates, error: draftErr } = await this.supabase
+      .from('elections')
+      .select('*')
+      .eq('status', 'DRAFT')
+      .lte('starts_at', now)
+      .gt('ends_at', now)
+      .order('starts_at', { ascending: true })
+      .limit(1);
+
+    if (draftErr) throw new BadRequestException(draftErr.message);
+    const election = candidates?.[0];
+    if (!election) {
+      return { closedCount };
+    }
+
+    const { count, error: countErr } = await this.supabase
+      .from('candidates')
+      .select('id', { count: 'exact', head: true })
+      .eq('election_id', election.id);
+
+    if (countErr) throw new BadRequestException(countErr.message);
+    if (!count || count < 1) {
+      return { closedCount };
+    }
+
+    const { data: opened, error: openErr2 } = await this.supabase
+      .from('elections')
+      .update({ status: 'OPEN' })
+      .eq('id', election.id)
+      .select('id')
+      .single();
+
+    if (openErr2) throw new BadRequestException(openErr2.message);
+    return { closedCount, openedId: opened?.id };
   }
 }
