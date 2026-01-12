@@ -7,6 +7,14 @@
     "noUnusedLocals": false,
     "noImplicitAny": false
   },
-  "include": ["jest.config.ts", "src/**/*.ts", "../results-service/src/**/*.ts"],
-  "references": []
+  "include": [
+    "jest.config.ts",
+    "src/**/*.ts",
+    "../results-service/src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../results-service"
+    }
+  ]
 }

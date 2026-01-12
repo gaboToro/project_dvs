@@ -6,11 +6,13 @@ import type { INestApplication } from '@nestjs/common';
 
 const useMock = jest.fn();
 const listenMock = jest.fn().mockResolvedValue(undefined);
+const enableCorsMock = jest.fn();
 
 jest.mock('@nestjs/core', () => ({
   NestFactory: {
     create: jest.fn().mockResolvedValue({
       use: useMock,
+      enableCors: enableCorsMock,
       listen: listenMock,
     } as Partial<INestApplication>),
   },
@@ -31,6 +33,7 @@ describe('api-gateway bootstrap', () => {
     jest.resetModules();
     useMock.mockClear();
     listenMock.mockClear();
+    enableCorsMock.mockClear();
     process.env.PORT = '3000';
   });
 

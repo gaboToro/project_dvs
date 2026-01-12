@@ -8,6 +8,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   //const globalPrefix = 'api';
 
+  app.enableCors({
+    origin: ['http://localhost:8081', 'http://localhost:19006', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   app.use('/api/auth', authProxy);
   app.use('/api/votes', votingProxy);
   app.use('/api/chain', blockchainProxy);

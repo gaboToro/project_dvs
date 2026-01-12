@@ -8,7 +8,7 @@ import { publishVoteCast } from './mq/kafka.producer';
 
 @Controller('votes')
 export class VotingController {
-  private readonly votedUsers = new Set<string>();
+  private readonly votedKeys = new Set<string>();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -35,6 +35,11 @@ export class VotingController {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
+    const roles: string[] = payload?.roles ?? [];
+    if (!roles.includes('voter')) {
+      throw new UnauthorizedException('Voter role required');
+    }
+
     const voterId = payload?.sub;
     if (!voterId) throw new UnauthorizedException('Invalid voter');
 
@@ -42,7 +47,8 @@ export class VotingController {
       throw new BadRequestException('Invalid vote payload');
     }
 
-    if (this.votedUsers.has(voterId)) {
+    const voteKey = `${body.electionId}:${voterId}`;
+    if (this.votedKeys.has(voteKey)) {
       throw new BadRequestException('User has already voted');
     }
 
@@ -63,7 +69,7 @@ export class VotingController {
       );
 
       // Confirm only when blockchain anchors the vote.
-      this.votedUsers.add(voterId);
+      this.votedKeys.add(voteKey);
 
       try {
         await publishVoteCast(event);

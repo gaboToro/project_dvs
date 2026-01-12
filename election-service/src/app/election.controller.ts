@@ -85,6 +85,13 @@ export class ElectionController {
     return this.service.closeElection(id);
   }
 
+  @Post('sync')
+  async sync(@Headers('authorization') auth: string | undefined) {
+    const payload = await this.getJwtPayload(auth);
+    requireAdmin(payload);
+    return this.service.syncElectionWindows();
+  }
+
   @Post(':id/candidates')
   async addCandidate(
     @Headers('authorization') auth: string | undefined,
@@ -105,5 +112,27 @@ export class ElectionController {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
     return this.service.removeCandidate(id, candidateId);
+  }
+
+  @Patch(':id/candidates/:candidateId')
+  async updateCandidate(
+    @Headers('authorization') auth: string | undefined,
+    @Param('id') id: string,
+    @Param('candidateId') candidateId: string,
+    @Body() dto: { name?: string; plan?: string | null },
+  ) {
+    const payload = await this.getJwtPayload(auth);
+    requireAdmin(payload);
+    return this.service.updateCandidate(id, candidateId, dto);
+  }
+
+  @Delete(':id')
+  async removeElection(
+    @Headers('authorization') auth: string | undefined,
+    @Param('id') id: string,
+  ) {
+    const payload = await this.getJwtPayload(auth);
+    requireAdmin(payload);
+    return this.service.deleteElection(id);
   }
 }

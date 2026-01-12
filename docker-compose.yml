@@ -2,6 +2,8 @@ services:
   postgres:
     image: postgres:16
     container_name: dvs-postgres
+    mem_limit: 512m
+    cpus: 0.5
     environment:
       POSTGRES_USER: dvs
       POSTGRES_PASSWORD: dvs
@@ -20,6 +22,8 @@ services:
   mongo:
     image: mongo:7
     container_name: dvs-mongo
+    mem_limit: 512m
+    cpus: 0.5
     environment:
       MONGO_INITDB_ROOT_USERNAME: dvs_user
       MONGO_INITDB_ROOT_PASSWORD: dvs_pass_123
@@ -31,12 +35,16 @@ services:
   redis:
     image: redis:7
     container_name: dvs-redis
+    mem_limit: 256m
+    cpus: 0.25
     ports:
       - "6379:6379"
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
     container_name: dvs-zk
+    mem_limit: 256m
+    cpus: 0.25
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -46,6 +54,8 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: dvs-kafka
+    mem_limit: 768m
+    cpus: 0.75
     depends_on:
       - zookeeper
     ports:
@@ -62,6 +72,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: dvs-rabbit
+    mem_limit: 512m
+    cpus: 0.5
     ports:
       - "5672:5672"
       - "15672:15672"
