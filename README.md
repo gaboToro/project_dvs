@@ -23,6 +23,19 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - user-service (3005)
 - election-service (3006)
 
+## Frontend app (Expo)
+Single Expo app lives under `apps/dvs-app` with voter, admin, and results flows.
+
+Run the app (web/mobile):
+```
+cd apps/dvs-app
+npm run web
+```
+
+API base URL:
+- Default: `http://localhost:3000/api`
+- Override: `EXPO_PUBLIC_API_BASE_URL=http://<gateway-host>:3000/api`
+
 ## Setup
 1) Install dependencies
    - npm install
