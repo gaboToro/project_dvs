@@ -23,7 +23,7 @@ describe('VotingController', () => {
     process.env.JWT_SECRET = 'test-secret';
     process.env.BLOCKCHAIN_SERVICE_URL = 'http://localhost:3003';
 
-    jwtMock.verifyAsync.mockResolvedValue({ sub: 'admin', roles: ['admin'] });
+    jwtMock.verifyAsync.mockResolvedValue({ sub: 'voter-1', roles: ['voter'] });
     httpMock.post.mockReturnValue(
       of({ data: { ok: true, block: { hash: 'h', prevHash: 'p' } } }),
     );
