@@ -8,5 +8,9 @@
     "noImplicitAny": false
   },
   "include": ["jest.config.ts", "src/**/*.ts", "../user-service/src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../user-service"
+    }
+  ]
 }
