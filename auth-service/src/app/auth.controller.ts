@@ -15,12 +15,13 @@ export class AuthController {
   async login(@Body() body: LoginRequestDto): Promise<LoginResponseDto> {
     const { username, password } = body;
 
-    const isValid = username === 'admin' && password === 'admin123';
-    if (!isValid) throw new UnauthorizedException('Invalid credentials');
+    const isAdmin = username === 'admin' && password === 'admin123';
+    const isVoter = username === 'voter' && password === 'voter123';
+    if (!isAdmin && !isVoter) throw new UnauthorizedException('Invalid credentials');
 
     const accessToken = await this.jwtService.signAsync({
       sub: username,
-      roles: ['admin'],
+      roles: [isAdmin ? 'admin' : 'voter'],
     });
 
     return { accessToken, tokenType: 'Bearer' };
