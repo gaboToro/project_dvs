@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@org/contracts": ["libs/contracts/src/index.ts"],
+      "@org/api-gateway": ["api-gateway/src/index.ts"],
+      "@org/auth-service": ["auth-service/src/index.ts"],
+      "@org/blockchain-service": ["blockchain-service/src/index.ts"],
+      "@org/election-service": ["election-service/src/index.ts"],
+      "@org/results-service": ["results-service/src/index.ts"],
+      "@org/user-service": ["user-service/src/index.ts"],
+      "@org/voting-service": ["voting-service/src/index.ts"]
+    },
+
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["@org/source"]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./api-gateway-e2e"
+    },
+    {
+      "path": "./api-gateway"
+    },
+    {
+      "path": "./auth-service-e2e"
+    },
+    {
+      "path": "./auth-service"
+    },
+    {
+      "path": "./libs/contracts"
+    },
+    {
+      "path": "./voting-service-e2e"
+    },
+    {
+      "path": "./voting-service"
+    },
+    {
+      "path": "./blockchain-service-e2e"
+    },
+    {
+      "path": "./blockchain-service"
+    },
+    {
+      "path": "./results-service-e2e"
+    },
+    {
+      "path": "./results-service"
+    },
+    {
+      "path": "./user-service-e2e"
+    },
+    {
+      "path": "./user-service"
+    },
+    {
+      "path": "./election-service-e2e"
+    },
+    {
+      "path": "./election-service"
+    }
+  ]
+}

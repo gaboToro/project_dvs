@@ -1,0 +1,75 @@
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.nx/cache
+.nx/workspace-data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+test-output
+
+.env
+.vscode
+
+
+# Terraform
+# Archivos de configuración local de Terraform
+.terraform/
+
+# Archivos de estado (CONTIENEN SECRETOS Y DATOS SENSIBLES)
+*.tfstate
+*.tfstate.*
+
+# Archivos de variables (Suelen contener credenciales)
+*.tfvars
+*.tfvars.json
+
+# Archivos de log y override
+*.txt
+terraform.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Archivo de bloqueo de dependencias (.lock.hcl)
+# Nota: Algunos equipos prefieren subirlo para asegurar versiones, 
+# pero si estás aprendiendo o en laboratorios, puedes ignorarlo.
+.terraform.lock.hcl

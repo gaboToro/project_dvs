@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "out-tsc/@org/blockchain-service-e2e",
+    "rootDir": "..",
+    "esModuleInterop": true,
+    "noUnusedLocals": false,
+    "noImplicitAny": false
+  },
+  "include": [
+    "jest.config.ts",
+    "src/**/*.ts",
+    "../blockchain-service/src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../blockchain-service"
+    }
+  ]
+}
