@@ -1,21 +1,62 @@
 import { UsersService } from './user.service';
+import { query } from './db/postgres';
+
+jest.mock('./db/postgres', () => ({
+  query: jest.fn(),
+}));
 
 describe('UsersService', () => {
   let svc: UsersService;
 
   beforeEach(async () => {
-    process.env.SEED_DEFAULT_USERS = 'true';
+    process.env.SEED_DEFAULT_USERS = 'false';
     svc = new UsersService();
     await svc.onModuleInit();
   });
 
-  it('should list seeded users', async () => {
+  it('should list users', async () => {
+    (query as jest.Mock).mockResolvedValueOnce([
+      {
+        id: 'u1',
+        username: 'admin',
+        full_name: 'Administrador',
+        role: 'admin',
+        enabled: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]);
     const list = await svc.list();
-    expect(list.length).toBeGreaterThanOrEqual(2);
+    expect(list.length).toBeGreaterThanOrEqual(1);
   });
 
   it('should create and fetch user', async () => {
     const username = `newuser-${Date.now()}`;
+    (query as jest.Mock)
+      .mockResolvedValueOnce([]) // exists check
+      .mockResolvedValueOnce([
+        {
+          id: 'u2',
+          username,
+          full_name: 'Nuevo Usuario',
+          role: 'voter',
+          enabled: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]) // insert
+      .mockResolvedValueOnce([
+        {
+          id: 'u2',
+          username,
+          full_name: 'Nuevo Usuario',
+          role: 'voter',
+          enabled: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]); // getById
+
     const created = await svc.create({
       username,
       password: 'testpass123',
@@ -30,10 +71,14 @@ describe('UsersService', () => {
   });
 
   it('eligibility should be false for non-voter', async () => {
-    const list = await svc.list();
-    const admin = list.find((u) => u.role === 'admin');
-    if (!admin) throw new Error('Admin user not found');
-    const res = await svc.eligibility(admin.id);
+    (query as jest.Mock).mockResolvedValueOnce([
+      {
+        id: 'admin-id',
+        role: 'admin',
+        enabled: true,
+      },
+    ]);
+    const res = await svc.eligibility('admin-id');
     expect(res.eligible).toBe(false);
   });
 });

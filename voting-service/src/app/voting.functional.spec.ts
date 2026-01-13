@@ -3,9 +3,13 @@ import type { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
+import { query } from './db/postgres';
 
 jest.mock('./mq/kafka.producer', () => ({
   publishVoteCast: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock('./db/postgres', () => ({
+  query: jest.fn(),
 }));
 
 describe('VotingService functional', () => {
@@ -18,6 +22,13 @@ describe('VotingService functional', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
+    process.env.VOTER_HASH_SECRET = 'test-hash';
+    (query as jest.Mock).mockReset();
+    (query as jest.Mock).mockImplementation((text: string) => {
+      if (text.includes('SELECT id FROM votes')) return [];
+      if (text.includes('INSERT INTO votes')) return [{ id: 'vote-1', cast_at: new Date() }];
+      return [];
+    });
     const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({
