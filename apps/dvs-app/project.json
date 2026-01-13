@@ -1,0 +1,5 @@
+{
+  "name": "dvs-app",
+  "projectType": "application",
+  "sourceRoot": "apps/dvs-app/app"
+}

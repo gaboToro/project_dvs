@@ -1,5 +1,16 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE TABLE IF NOT EXISTS users (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username text NOT NULL UNIQUE,
+  full_name text NOT NULL,
+  role text NOT NULL CHECK (role IN ('admin', 'voter')),
+  enabled boolean NOT NULL DEFAULT true,
+  password_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS votes (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   election_id text NOT NULL,

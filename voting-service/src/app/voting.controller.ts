@@ -1,15 +1,14 @@
-import { BadRequestException, Body, Controller, Headers, Post, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Headers, Post, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { CastVoteRequestDto, VoteCastEvent } from '@org/contracts';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { ServiceUnavailableException } from '@nestjs/common';
+import { createHash, randomUUID } from 'crypto';
 import { publishVoteCast } from './mq/kafka.producer';
+import { query } from './db/postgres';
 
 @Controller('votes')
 export class VotingController {
-  private readonly votedKeys = new Set<string>();
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly http: HttpService,
@@ -18,6 +17,7 @@ export class VotingController {
   @Post()
   async castVote(
     @Headers('authorization') authHeader: string | undefined,
+    @Headers('x-request-id') requestIdHeader: string | undefined,
     @Body() body: CastVoteRequestDto,
   ) {
     if (!authHeader?.startsWith('Bearer ')) {
@@ -47,8 +47,12 @@ export class VotingController {
       throw new BadRequestException('Invalid vote payload');
     }
 
-    const voteKey = `${body.electionId}:${voterId}`;
-    if (this.votedKeys.has(voteKey)) {
+    const voterHash = this.hashVoter(voterId);
+    const alreadyVoted = await query<{ id: string }>(
+      'SELECT id FROM votes WHERE election_id = $1 AND voter_hash = $2 LIMIT 1',
+      [body.electionId, voterHash],
+    );
+    if (alreadyVoted.length > 0) {
       throw new BadRequestException('User has already voted');
     }
 
@@ -68,8 +72,24 @@ export class VotingController {
         }),
       );
 
-      // Confirm only when blockchain anchors the vote.
-      this.votedKeys.add(voteKey);
+      const requestId = requestIdHeader || randomUUID();
+      let voteId: string | undefined;
+      let castAt: string | undefined;
+      try {
+        const inserted = await query<{ id: string; cast_at: Date }>(
+          `INSERT INTO votes (election_id, candidate_id, voter_hash, request_id)
+           VALUES ($1, $2, $3, $4)
+           RETURNING id, cast_at`,
+          [body.electionId, body.candidateId, voterHash, requestId],
+        );
+        voteId = inserted[0]?.id;
+        castAt = inserted[0]?.cast_at?.toISOString();
+      } catch (dbError: any) {
+        if (dbError?.code === '23505') {
+          throw new BadRequestException('User has already voted');
+        }
+        throw dbError;
+      }
 
       try {
         await publishVoteCast(event);
@@ -83,13 +103,23 @@ export class VotingController {
         message: 'Vote registered and anchored to blockchain',
         event,
         blockchain: res.data,
+        voteId,
+        castAt,
       };
     } catch (e: any) {
+      if (e instanceof BadRequestException) {
+        throw e;
+      }
       // Reject if blockchain fails.
       const reason = e?.code ?? e?.message ?? 'unknown error';
       throw new ServiceUnavailableException(
         `Blockchain service unavailable: ${reason}`,
       );
     }
+  }
+
+  private hashVoter(voterId: string): string {
+    const secret = process.env.VOTER_HASH_SECRET ?? 'dev-voter-hash-secret';
+    return createHash('sha256').update(`${voterId}:${secret}`).digest('hex');
   }
 }

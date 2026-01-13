@@ -18,6 +18,10 @@ export class CreateUserRequestDto {
   username!: string;
 
   @IsString()
+  @MinLength(6)
+  password!: string;
+
+  @IsString()
   @MinLength(3)
   fullName!: string;
 
