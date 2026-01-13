@@ -1,10 +1,15 @@
-import { Body, Controller, Get, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Post, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import type { LoginRequestDto, LoginResponseDto } from '@org/contracts';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly http: HttpService,
+  ) {}
 
   @Get('health')
   health() {
@@ -13,17 +18,32 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() body: LoginRequestDto): Promise<LoginResponseDto> {
-    const { username, password } = body;
+    const userServiceUrl = process.env.USER_SERVICE_URL ?? 'http://localhost:3005';
+    const internalToken = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!internalToken) throw new ServiceUnavailableException('Internal token missing');
 
-    const isAdmin = username === 'admin' && password === 'admin123';
-    const isVoter = username === 'voter' && password === 'voter123';
-    if (!isAdmin && !isVoter) throw new UnauthorizedException('Invalid credentials');
+    try {
+      const res = await firstValueFrom(
+        this.http.post(
+          `${userServiceUrl}/api/users/validate`,
+          body,
+          { headers: { 'x-internal-token': internalToken } },
+        ),
+      );
 
-    const accessToken = await this.jwtService.signAsync({
-      sub: username,
-      roles: [isAdmin ? 'admin' : 'voter'],
-    });
+      const user = res.data as { id: string; role: string };
+      const accessToken = await this.jwtService.signAsync({
+        sub: user.id,
+        roles: [user.role],
+      });
 
-    return { accessToken, tokenType: 'Bearer' };
+      return { accessToken, tokenType: 'Bearer' };
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      throw new ServiceUnavailableException('User service unavailable');
+    }
   }
 }

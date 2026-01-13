@@ -2,6 +2,11 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { UserDto } from '@org/contracts';
+import { query } from './db/postgres';
+
+jest.mock('./db/postgres', () => ({
+  query: jest.fn(),
+}));
 
 describe('UserService functional', () => {
   let app: INestApplication;
@@ -10,6 +15,17 @@ describe('UserService functional', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
+    (query as jest.Mock).mockResolvedValue([
+      {
+        id: 'u1',
+        username: 'admin',
+        full_name: 'Administrador',
+        role: 'admin',
+        enabled: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]);
     const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({

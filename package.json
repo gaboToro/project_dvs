@@ -45,6 +45,7 @@
   },
   "workspaces": [
     "packages/*",
+    "apps/*",
     "api-gateway",
     "api-gateway-e2e",
     "libs",
@@ -79,6 +80,7 @@
     "http-proxy-middleware": "^3.0.5",
     "kafkajs": "^2.2.4",
     "mongodb": "^7.0.0",
+    "pg": "^8.11.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",

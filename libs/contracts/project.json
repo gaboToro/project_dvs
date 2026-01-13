@@ -1,0 +1,5 @@
+{
+  "name": "@org/contracts",
+  "projectType": "library",
+  "sourceRoot": "libs/contracts/src"
+}

@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
+import { of, throwError } from 'rxjs';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -8,11 +10,18 @@ describe('AuthController', () => {
   const jwtMock = {
     signAsync: jest.fn().mockResolvedValue('test.jwt.token'),
   };
+  const httpMock = {
+    post: jest.fn(),
+  };
 
   beforeAll(async () => {
+    process.env.INTERNAL_SERVICE_TOKEN = 'test-token';
     const moduleRef = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: JwtService, useValue: jwtMock }],
+      providers: [
+        { provide: JwtService, useValue: jwtMock },
+        { provide: HttpService, useValue: httpMock },
+      ],
     }).compile();
 
     controller = moduleRef.get(AuthController);
@@ -27,16 +36,22 @@ describe('AuthController', () => {
   });
 
   it('POST /auth/login should reject invalid credentials', async () => {
+    httpMock.post.mockReturnValueOnce(
+      throwError(() => ({ response: { status: 401 } })),
+    );
     await expect(
       controller.login({ username: 'x', password: 'y' } as any),
     ).rejects.toHaveProperty('status', 401);
   });
 
   it('POST /auth/login should return access token for valid credentials', async () => {
+    httpMock.post.mockReturnValueOnce(
+      of({ data: { id: 'admin-id', role: 'admin' } }),
+    );
     const res = await controller.login({ username: 'admin', password: 'admin123' } as any);
 
     expect(jwtMock.signAsync).toHaveBeenCalledWith({
-      sub: 'admin',
+      sub: 'admin-id',
       roles: ['admin'],
     });
 
