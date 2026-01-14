@@ -9,6 +9,7 @@ describe('api-gateway functional', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
+    process.env.RATE_LIMITER_ENABLED = 'false';
     const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({

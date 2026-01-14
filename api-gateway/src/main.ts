@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { authProxy, votingProxy, blockchainProxy, resultsProxy, usersProxy, electionProxy } from './app/proxy.middleware';
+import { rateLimitMiddleware } from './app/rate-limit.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  app.use(rateLimitMiddleware);
   app.use('/api/auth', authProxy);
   app.use('/api/votes', votingProxy);
   app.use('/api/chain', blockchainProxy);

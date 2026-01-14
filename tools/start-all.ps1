@@ -5,6 +5,7 @@ docker compose up -d
 
 $services = @(
   "auth-service",
+  "rate-limiter-service",
   "user-service",
   "blockchain-service",
   "voting-service",
