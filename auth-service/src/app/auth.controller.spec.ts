@@ -16,6 +16,7 @@ describe('AuthController', () => {
 
   beforeAll(async () => {
     process.env.INTERNAL_SERVICE_TOKEN = 'test-token';
+    process.env.AUDIT_LOG_SERVICE_URL = 'http://audit:3007';
     const moduleRef = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -29,6 +30,7 @@ describe('AuthController', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    httpMock.post.mockReset();
   });
 
   it('GET /auth/health should return ok payload', () => {
@@ -45,9 +47,9 @@ describe('AuthController', () => {
   });
 
   it('POST /auth/login should return access token for valid credentials', async () => {
-    httpMock.post.mockReturnValueOnce(
-      of({ data: { id: 'admin-id', role: 'admin' } }),
-    );
+    httpMock.post
+      .mockReturnValueOnce(of({ data: { id: 'admin-id', role: 'admin' } }))
+      .mockReturnValueOnce(of({ data: { ok: true } }));
     const res = await controller.login({ username: 'admin', password: 'admin123' } as any);
 
     expect(jwtMock.signAsync).toHaveBeenCalledWith({

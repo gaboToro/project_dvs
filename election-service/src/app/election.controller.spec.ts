@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { ElectionController } from './election.controller';
 import { ElectionService } from './election.service';
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
 
 describe('ElectionController (unit)', () => {
   let controller: ElectionController;
@@ -20,6 +21,9 @@ describe('ElectionController (unit)', () => {
   const jwtMock = {
     verifyAsync: jest.fn(),
   };
+  const httpMock = {
+    post: jest.fn(),
+  };
 
   beforeEach(async () => {
     process.env.JWT_SECRET = 'test-secret';
@@ -29,12 +33,14 @@ describe('ElectionController (unit)', () => {
       providers: [
         { provide: ElectionService, useValue: serviceMock },
         { provide: JwtService, useValue: jwtMock },
+        { provide: HttpService, useValue: httpMock },
       ],
     }).compile();
 
     controller = moduleRef.get(ElectionController);
 
     jest.clearAllMocks();
+    httpMock.post.mockReset();
   });
 
   // ---------- PUBLIC ----------

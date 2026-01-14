@@ -29,9 +29,9 @@ describe('VotingController', () => {
     process.env.VOTER_HASH_SECRET = 'test-hash';
 
     jwtMock.verifyAsync.mockResolvedValue({ sub: 'voter-1', roles: ['voter'] });
-    httpMock.post.mockReturnValue(
-      of({ data: { ok: true, block: { hash: 'h', prevHash: 'p' } } }),
-    );
+    httpMock.post
+      .mockReturnValueOnce(of({ data: { ok: true, block: { hash: 'h', prevHash: 'p' } } }))
+      .mockReturnValueOnce(of({ data: { ok: true } }));
     (query as jest.Mock).mockReset();
     (query as jest.Mock).mockImplementation((text: string) => {
       if (text.includes('SELECT id FROM votes')) return [];

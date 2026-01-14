@@ -6,6 +6,7 @@ const BLOCKCHAIN = process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003'
 const RESULTS = process.env.RESULTS_SERVICE_URL ?? 'http://localhost:3004';
 const USERS = process.env.USER_SERVICE_URL ?? 'http://localhost:3005';
 const ELECTION = process.env.ELECTION_SERVICE_URL ?? 'http://localhost:3006';
+const AUDIT = process.env.AUDIT_LOG_SERVICE_URL ?? 'http://localhost:3007';
 
 export const authProxy = createProxyMiddleware({
   target: AUTH,
@@ -41,4 +42,10 @@ export const electionProxy = createProxyMiddleware({
   target: ELECTION,
   changeOrigin: true,
   pathRewrite: (path) => `/api/elections${path}`,
+});
+
+export const auditProxy = createProxyMiddleware({
+  target: AUDIT,
+  changeOrigin: true,
+  pathRewrite: (path) => `/api/audit${path}`,
 });

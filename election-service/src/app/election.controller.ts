@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, Unauthorize
 import { JwtService } from '@nestjs/jwt';
 import type { CreateCandidateRequestDto, CreateElectionRequestDto, UpdateElectionRequestDto, ElectionStatus } from '@org/contracts';
 import { ElectionService } from './election.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 function requireAdmin(payload: any) {
   const roles: string[] = payload?.roles ?? [];
@@ -13,6 +15,7 @@ export class ElectionController {
   constructor(
     private readonly service: ElectionService,
     private readonly jwt: JwtService,
+    private readonly http: HttpService,
   ) {}
 
   private async getJwtPayload(authHeader?: string) {
@@ -57,7 +60,12 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.createElection(dto);
+    const created = await this.service.createElection(dto);
+    void this.audit('CREATE_ELECTION', payload?.sub, 'admin', {
+      electionId: created.id,
+      title: created.title,
+    });
+    return created;
   }
 
   @Patch(':id')
@@ -68,21 +76,29 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.updateElection(id, dto);
+    const updated = await this.service.updateElection(id, dto);
+    void this.audit('UPDATE_ELECTION', payload?.sub, 'admin', {
+      electionId: id,
+    });
+    return updated;
   }
 
   @Post(':id/open')
   async open(@Headers('authorization') auth: string | undefined, @Param('id') id: string) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.openElection(id);
+    const res = await this.service.openElection(id);
+    void this.audit('OPEN_ELECTION', payload?.sub, 'admin', { electionId: id });
+    return res;
   }
 
   @Post(':id/close')
   async close(@Headers('authorization') auth: string | undefined, @Param('id') id: string) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.closeElection(id);
+    const res = await this.service.closeElection(id);
+    void this.audit('CLOSE_ELECTION', payload?.sub, 'admin', { electionId: id });
+    return res;
   }
 
   @Post('sync')
@@ -100,7 +116,12 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.addCandidate(id, dto);
+    const created = await this.service.addCandidate(id, dto);
+    void this.audit('ADD_CANDIDATE', payload?.sub, 'admin', {
+      electionId: id,
+      candidateId: created.id,
+    });
+    return created;
   }
 
   @Delete(':id/candidates/:candidateId')
@@ -111,7 +132,12 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.removeCandidate(id, candidateId);
+    const res = await this.service.removeCandidate(id, candidateId);
+    void this.audit('REMOVE_CANDIDATE', payload?.sub, 'admin', {
+      electionId: id,
+      candidateId,
+    });
+    return res;
   }
 
   @Patch(':id/candidates/:candidateId')
@@ -123,7 +149,12 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.updateCandidate(id, candidateId, dto);
+    const updated = await this.service.updateCandidate(id, candidateId, dto);
+    void this.audit('UPDATE_CANDIDATE', payload?.sub, 'admin', {
+      electionId: id,
+      candidateId,
+    });
+    return updated;
   }
 
   @Delete(':id')
@@ -133,6 +164,37 @@ export class ElectionController {
   ) {
     const payload = await this.getJwtPayload(auth);
     requireAdmin(payload);
-    return this.service.deleteElection(id);
+    const res = await this.service.deleteElection(id);
+    void this.audit('DELETE_ELECTION', payload?.sub, 'admin', { electionId: id });
+    return res;
+  }
+
+  private async audit(
+    action: string,
+    actorId?: string,
+    actorRole?: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    const auditUrl = process.env.AUDIT_LOG_SERVICE_URL;
+    const token = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!auditUrl || !token) return;
+
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${auditUrl}/api/audit/log`,
+          {
+            actorId,
+            actorRole,
+            action,
+            resource: 'elections',
+            metadata,
+          },
+          { headers: { 'x-internal-token': token } },
+        ),
+      );
+    } catch {
+      // Best effort only.
+    }
   }
 }

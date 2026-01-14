@@ -17,7 +17,7 @@ describe('VotingService functional', () => {
   let baseUrl: string;
   let jwt: JwtService;
   const httpMock = {
-    post: jest.fn(() => of({ data: { ok: true } })),
+    post: jest.fn(),
   };
 
   beforeAll(async () => {
@@ -29,6 +29,9 @@ describe('VotingService functional', () => {
       if (text.includes('INSERT INTO votes')) return [{ id: 'vote-1', cast_at: new Date() }];
       return [];
     });
+    httpMock.post
+      .mockReturnValueOnce(of({ data: { ok: true } }))
+      .mockReturnValueOnce(of({ data: { ok: true } }));
     const { AppModule } = require('./app.module');
 
     const moduleRef = await Test.createTestingModule({

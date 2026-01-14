@@ -47,6 +47,12 @@
     },
     {
       "path": "./election-service"
+    },
+    {
+      "path": "./audit-log-service-e2e"
+    },
+    {
+      "path": "./audit-log-service"
     }
   ]
 }

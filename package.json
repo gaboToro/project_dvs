@@ -61,7 +61,9 @@
     "user-service",
     "user-service-e2e",
     "election-service",
-    "election-service-e2e"
+    "election-service-e2e",
+    "audit-log-service",
+    "audit-log-service-e2e"
   ],
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

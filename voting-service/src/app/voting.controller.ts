@@ -98,7 +98,7 @@ export class VotingController {
         console.warn(`Kafka publish failed: ${reason}`);
       }
 
-      return {
+      const response = {
         ok: true,
         message: 'Vote registered and anchored to blockchain',
         event,
@@ -106,10 +106,20 @@ export class VotingController {
         voteId,
         castAt,
       };
+      void this.audit('VOTE_CAST', voterId, 'voter', {
+        electionId: body.electionId,
+        candidateId: body.candidateId,
+      });
+      return response;
     } catch (e: any) {
       if (e instanceof BadRequestException) {
         throw e;
       }
+      void this.audit('VOTE_ERROR', voterId, 'voter', {
+        electionId: body.electionId,
+        candidateId: body.candidateId,
+        reason: e?.message ?? 'unknown',
+      });
       // Reject if blockchain fails.
       const reason = e?.code ?? e?.message ?? 'unknown error';
       throw new ServiceUnavailableException(
@@ -121,5 +131,34 @@ export class VotingController {
   private hashVoter(voterId: string): string {
     const secret = process.env.VOTER_HASH_SECRET ?? 'dev-voter-hash-secret';
     return createHash('sha256').update(`${voterId}:${secret}`).digest('hex');
+  }
+
+  private async audit(
+    action: string,
+    actorId?: string,
+    actorRole?: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    const auditUrl = process.env.AUDIT_LOG_SERVICE_URL;
+    const token = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!auditUrl || !token) return;
+
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${auditUrl}/api/audit/log`,
+          {
+            actorId,
+            actorRole,
+            action,
+            resource: 'votes',
+            metadata,
+          },
+          { headers: { 'x-internal-token': token } },
+        ),
+      );
+    } catch {
+      // Best effort only.
+    }
   }
 }
