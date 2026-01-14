@@ -59,6 +59,12 @@
     },
     {
       "path": "./rate-limiter-service"
+    },
+    {
+      "path": "./dashboard-service"
+    },
+    {
+      "path": "./dashboard-service-e2e"
     }
   ]
 }

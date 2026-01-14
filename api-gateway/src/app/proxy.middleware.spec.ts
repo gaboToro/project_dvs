@@ -14,6 +14,7 @@ describe('proxy.middleware', () => {
     process.env.VOTING_SERVICE_URL = 'http://voting:3002';
     process.env.BLOCKCHAIN_SERVICE_URL = 'http://bc:3003';
     process.env.RESULTS_SERVICE_URL = 'http://results:3004';
+    process.env.DASHBOARD_SERVICE_URL = 'http://dashboard:3008';
     process.env.USER_SERVICE_URL = 'http://users:3005';
     process.env.ELECTION_SERVICE_URL = 'http://election:3006';
     process.env.AUDIT_LOG_SERVICE_URL = 'http://audit:3007';
@@ -22,8 +23,8 @@ describe('proxy.middleware', () => {
   it('should create all proxies with correct targets', async () => {
     const mod = await import('./proxy.middleware.js');
 
-    // Ensure createProxyMiddleware was called 7 times
-    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(7);
+    // Ensure createProxyMiddleware was called 8 times
+    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(8);
 
     const calls = createProxyMiddlewareMock.mock.calls.map((c) => c[0]);
 
@@ -33,6 +34,7 @@ describe('proxy.middleware', () => {
       'http://voting:3002',
       'http://bc:3003',
       'http://results:3004',
+      'http://dashboard:3008',
       'http://users:3005',
       'http://election:3006',
       'http://audit:3007',
@@ -43,6 +45,7 @@ describe('proxy.middleware', () => {
     expect(mod.votingProxy).toBeDefined();
     expect(mod.blockchainProxy).toBeDefined();
     expect(mod.resultsProxy).toBeDefined();
+    expect(mod.dashboardProxy).toBeDefined();
     expect(mod.usersProxy).toBeDefined();
     expect(mod.electionProxy).toBeDefined();
     expect(mod.auditProxy).toBeDefined();
@@ -57,14 +60,16 @@ describe('proxy.middleware', () => {
     const votes = calls[1];
     const chain = calls[2];
     const results = calls[3];
-    const users = calls[4];
-    const elections = calls[5];
-    const audit = calls[6];
+    const dashboard = calls[4];
+    const users = calls[5];
+    const elections = calls[6];
+    const audit = calls[7];
 
     expect(auth.pathRewrite('/login')).toBe('/api/auth/login');
     expect(votes.pathRewrite('/')).toBe('/api/votes/');
     expect(chain.pathRewrite('/add')).toBe('/api/chain/add');
     expect(results.pathRewrite('/election-2025')).toBe('/api/results/election-2025');
+    expect(dashboard.pathRewrite('/demo-2025')).toBe('/api/dashboard/demo-2025');
     expect(users.pathRewrite('/eligibility/123')).toBe('/api/users/eligibility/123');
     expect(elections.pathRewrite('/active')).toBe('/api/elections/active');
     expect(audit.pathRewrite('/log')).toBe('/api/audit/log');

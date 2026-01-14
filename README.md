@@ -13,6 +13,7 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - Elections persist in Supabase.
 - Votes are anchored to an in-memory blockchain and published to Kafka.
 - Results service consumes Kafka and updates Mongo read model.
+- Dashboard service consumes Kafka and streams realtime results over WebSockets.
 - Audit log service stores security-relevant events in Postgres.
 
 ## Services
@@ -21,6 +22,7 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - voting-service (3002)
 - blockchain-service (3003)
 - results-service (3004)
+- dashboard-service (3008)
 - user-service (3005)
 - election-service (3006)
 - audit-log-service (3007)
@@ -61,6 +63,7 @@ API base URL:
    - npx nx serve blockchain-service
    - npx nx serve voting-service
    - npx nx serve results-service
+   - npx nx serve dashboard-service
    - npx nx serve election-service
    - npx nx serve audit-log-service
    - npx nx serve api-gateway
