@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { RateLimitController } from './ratelimit.controller';
 import { RateLimitService } from './ratelimit.service';
 
@@ -7,13 +7,29 @@ describe('RateLimitController', () => {
   const limiterMock = {
     check: jest.fn(),
   };
+  let moduleRef: TestingModule | undefined;
+  let originalToken: string | undefined;
 
   beforeEach(() => {
+    originalToken = process.env.INTERNAL_SERVICE_TOKEN;
     limiterMock.check.mockReset();
   });
 
+  afterEach(async () => {
+    if (moduleRef) {
+      await moduleRef.close();
+      moduleRef = undefined;
+    }
+
+    if (originalToken === undefined) {
+      delete process.env.INTERNAL_SERVICE_TOKEN;
+    } else {
+      process.env.INTERNAL_SERVICE_TOKEN = originalToken;
+    }
+  });
+
   it('returns ok on health', async () => {
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       controllers: [RateLimitController],
       providers: [{ provide: RateLimitService, useValue: limiterMock }],
     }).compile();
@@ -27,7 +43,7 @@ describe('RateLimitController', () => {
 
   it('denies when internal token is invalid', async () => {
     process.env.INTERNAL_SERVICE_TOKEN = 'token';
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       controllers: [RateLimitController],
       providers: [{ provide: RateLimitService, useValue: limiterMock }],
     }).compile();
@@ -48,7 +64,7 @@ describe('RateLimitController', () => {
       resetAt: Date.now(),
     });
 
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       controllers: [RateLimitController],
       providers: [{ provide: RateLimitService, useValue: limiterMock }],
     }).compile();

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 
 type RateLimitResult = {
@@ -8,15 +8,30 @@ type RateLimitResult = {
   resetAt: number;
 };
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
 @Injectable()
-export class RateLimitService {
+export class RateLimitService implements OnModuleDestroy {
+  private readonly redis: Redis;
+
+  constructor() {
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    if (typeof this.redis.quit === 'function') {
+      await this.redis.quit();
+      return;
+    }
+
+    if (typeof this.redis.disconnect === 'function') {
+      this.redis.disconnect();
+    }
+  }
+
   async check(key: string, limit: number, windowSec: number): Promise<RateLimitResult> {
     const now = Date.now();
     const redisKey = `ratelimit:${key}`;
 
-    const pipeline = redis.multi();
+    const pipeline = this.redis.multi();
     pipeline.incr(redisKey);
     pipeline.ttl(redisKey);
     const results = await pipeline.exec();
@@ -25,7 +40,7 @@ export class RateLimitService {
     let ttl = Number(results?.[1]?.[1] ?? -1);
 
     if (ttl < 0) {
-      await redis.expire(redisKey, windowSec);
+      await this.redis.expire(redisKey, windowSec);
       ttl = windowSec;
     }
 
