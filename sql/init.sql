@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   username text NOT NULL UNIQUE,
   full_name text NOT NULL,
+  email text,
   role text NOT NULL CHECK (role IN ('admin', 'voter')),
   enabled boolean NOT NULL DEFAULT true,
   password_hash text NOT NULL,

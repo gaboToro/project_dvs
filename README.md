@@ -121,3 +121,4 @@ API base URL:
 
 ## Notes
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
+- users.email is optional and can be updated by the user profile.

@@ -7,6 +7,7 @@ type UserRow = {
   id: string;
   username: string;
   full_name: string;
+  email: string | null;
   role: UserRole;
   enabled: boolean;
   created_at: Date | string;
@@ -24,14 +25,14 @@ export class UsersService implements OnModuleInit {
 
   async list(): Promise<UserDto[]> {
     const rows = await query<UserRow>(
-      'SELECT id, username, full_name, role, enabled, created_at, updated_at FROM users ORDER BY created_at DESC',
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users ORDER BY created_at DESC',
     );
     return rows.map((row) => this.mapRow(row));
   }
 
   async getById(id: string): Promise<UserDto> {
     const rows = await query<UserRow>(
-      'SELECT id, username, full_name, role, enabled, created_at, updated_at FROM users WHERE id = $1',
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users WHERE id = $1',
       [id],
     );
     const row = rows[0];
@@ -41,7 +42,7 @@ export class UsersService implements OnModuleInit {
 
   async getByUsername(username: string): Promise<UserDto | undefined> {
     const rows = await query<UserRow>(
-      'SELECT id, username, full_name, role, enabled, created_at, updated_at FROM users WHERE username = $1',
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users WHERE username = $1',
       [username],
     );
     const row = rows[0];
@@ -55,10 +56,17 @@ export class UsersService implements OnModuleInit {
     const passwordHash = this.hashPassword(payload.password);
 
     const rows = await query<UserRow>(
-      `INSERT INTO users (username, full_name, role, enabled, password_hash)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, username, full_name, role, enabled, created_at, updated_at`,
-      [payload.username, payload.fullName, payload.role, payload.enabled ?? true, passwordHash],
+      `INSERT INTO users (username, full_name, email, role, enabled, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, username, full_name, email, role, enabled, created_at, updated_at`,
+      [
+        payload.username,
+        payload.fullName,
+        payload.email ?? null,
+        payload.role,
+        payload.enabled ?? true,
+        passwordHash,
+      ],
     );
     const row = rows[0];
     if (!row) throw new BadRequestException('User not created');
@@ -69,14 +77,16 @@ export class UsersService implements OnModuleInit {
     const rows = await query<UserRow>(
       `UPDATE users
        SET full_name = COALESCE($2, full_name),
-           role = COALESCE($3, role),
-           enabled = COALESCE($4, enabled),
+           email = COALESCE($3, email),
+           role = COALESCE($4, role),
+           enabled = COALESCE($5, enabled),
            updated_at = now()
        WHERE id = $1
-       RETURNING id, username, full_name, role, enabled, created_at, updated_at`,
+       RETURNING id, username, full_name, email, role, enabled, created_at, updated_at`,
       [
         id,
         payload.fullName ?? null,
+        payload.email ?? null,
         payload.role ?? null,
         payload.enabled ?? null,
       ],
@@ -122,16 +132,18 @@ export class UsersService implements OnModuleInit {
     const voterPassword = process.env.VOTER_PASSWORD ?? 'voter123';
 
     await query(
-      `INSERT INTO users (username, full_name, role, enabled, password_hash)
+      `INSERT INTO users (username, full_name, email, role, enabled, password_hash)
        VALUES
-         ($1, $2, 'admin', true, $3),
-         ($4, $5, 'voter', true, $6)`,
+         ($1, $2, $3, 'admin', true, $4),
+         ($5, $6, $7, 'voter', true, $8)`,
       [
         'admin',
         'Administrador',
+        null,
         this.hashPassword(adminPassword),
         'voter',
         'Votante Demo',
+        null,
         this.hashPassword(voterPassword),
       ],
     );
@@ -142,6 +154,7 @@ export class UsersService implements OnModuleInit {
       id: row.id,
       username: row.username,
       fullName: row.full_name,
+      email: row.email,
       role: row.role,
       enabled: row.enabled,
       createdAt: this.toMillis(row.created_at),
