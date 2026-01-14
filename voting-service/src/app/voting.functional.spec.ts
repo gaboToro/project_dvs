@@ -18,6 +18,7 @@ describe('VotingService functional', () => {
   let jwt: JwtService;
   const httpMock = {
     post: jest.fn(),
+    get: jest.fn(),
   };
 
   beforeAll(async () => {
@@ -29,6 +30,18 @@ describe('VotingService functional', () => {
       if (text.includes('INSERT INTO votes')) return [{ id: 'vote-1', cast_at: new Date() }];
       return [];
     });
+    httpMock.get.mockReturnValue(
+      of({
+        data: {
+          id: 'e1',
+          title: 'Election 1',
+          startsAt: '2026-01-01T00:00:00Z',
+          endsAt: '2026-01-02T00:00:00Z',
+          status: 'OPEN',
+          candidates: [{ id: 'c1', electionId: 'e1', name: 'Candidate 1' }],
+        },
+      }),
+    );
     httpMock.post
       .mockReturnValueOnce(of({ data: { ok: true } }))
       .mockReturnValueOnce(of({ data: { ok: true } }));

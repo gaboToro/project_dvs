@@ -21,6 +21,7 @@ describe('VotingController', () => {
 
   const httpMock = {
     post: jest.fn(),
+    get: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -35,6 +36,18 @@ describe('VotingController', () => {
       }
       return of({ data: { ok: true } });
     });
+    httpMock.get.mockReturnValue(
+      of({
+        data: {
+          id: 'e1',
+          title: 'Election 1',
+          startsAt: '2026-01-01T00:00:00Z',
+          endsAt: '2026-01-02T00:00:00Z',
+          status: 'OPEN',
+          candidates: [{ id: 'c1', electionId: 'e1', name: 'Candidate 1' }],
+        },
+      }),
+    );
     (query as jest.Mock).mockReset();
     (query as jest.Mock).mockImplementation((text: string) => {
       if (text.includes('SELECT id FROM votes')) return [];
@@ -71,6 +84,7 @@ describe('VotingController', () => {
     );
 
     expect(res.ok).toBe(true);
+    expect(httpMock.get).toHaveBeenCalled();
     expect(httpMock.post).toHaveBeenCalled();
     expect(jwtMock.verifyAsync).toHaveBeenCalled();
   });
