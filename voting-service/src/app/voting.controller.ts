@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Headers, Post, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { CastVoteRequestDto, VoteCastEvent } from '@org/contracts';
+import type { CastVoteRequestDto, ElectionWithCandidatesDto, VoteCastEvent } from '@org/contracts';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { createHash, randomUUID } from 'crypto';
@@ -46,6 +46,8 @@ export class VotingController {
     if (!body?.electionId || !body?.candidateId) {
       throw new BadRequestException('Invalid vote payload');
     }
+
+    await this.assertElectionOpen(body.electionId, body.candidateId);
 
     const voterHash = this.hashVoter(voterId);
     const alreadyVoted = await query<{ id: string }>(
@@ -131,6 +133,37 @@ export class VotingController {
   private hashVoter(voterId: string): string {
     const secret = process.env.VOTER_HASH_SECRET ?? 'dev-voter-hash-secret';
     return createHash('sha256').update(`${voterId}:${secret}`).digest('hex');
+  }
+
+  private async assertElectionOpen(electionId: string, candidateId: string) {
+    const electionUrl = process.env.ELECTION_SERVICE_URL ?? 'http://localhost:3006';
+
+    try {
+      const res = await firstValueFrom(
+        this.http.get<ElectionWithCandidatesDto>(
+          `${electionUrl}/api/elections/${encodeURIComponent(electionId)}`,
+        ),
+      );
+      const election = res.data;
+      if (!election || election.status !== 'OPEN') {
+        throw new BadRequestException('Election is not open');
+      }
+      const candidates = election.candidates ?? [];
+      const hasCandidate = candidates.some((candidate) => candidate.id === candidateId);
+      if (!hasCandidate) {
+        throw new BadRequestException('Candidate not in election');
+      }
+    } catch (error: any) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const status = error?.response?.status;
+      if (status === 404) {
+        throw new BadRequestException('Election not found');
+      }
+      const reason = error?.code ?? error?.message ?? 'unknown error';
+      throw new ServiceUnavailableException(`Election service unavailable: ${reason}`);
+    }
   }
 
   private async audit(
