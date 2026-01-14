@@ -63,6 +63,8 @@
     "election-service",
     "election-service-e2e",
     "audit-log-service",
+    "rate-limiter-service",
+    "rate-limiter-service-e2e",
     "audit-log-service-e2e"
   ],
   "dependencies": {
@@ -80,6 +82,7 @@
     "cron": "^3.1.6",
     "dotenv": "^17.2.3",
     "http-proxy-middleware": "^3.0.5",
+    "ioredis": "^5.3.2",
     "kafkajs": "^2.2.4",
     "mongodb": "^7.0.0",
     "pg": "^8.11.5",

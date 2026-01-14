@@ -20,7 +20,6 @@ async function bootstrap() {
   const jwt = app.get(JwtService);
   app.use(createAuditMiddleware(jwt));
   app.use(rateLimitMiddleware);
-
   app.use('/api/auth', authProxy);
   app.use('/api/votes', votingProxy);
   app.use('/api/chain', blockchainProxy);

@@ -53,6 +53,12 @@
     },
     {
       "path": "./audit-log-service"
+    },
+    {
+      "path": "./rate-limiter-service-e2e"
+    },
+    {
+      "path": "./rate-limiter-service"
     }
   ]
 }
