@@ -26,6 +26,7 @@ jest.mock('./proxy.middleware', () => ({
   votingProxy: { name: 'votingProxy' },
   blockchainProxy: { name: 'blockchainProxy' },
   resultsProxy: { name: 'resultsProxy' },
+  dashboardProxy: { name: 'dashboardProxy' },
   usersProxy: { name: 'usersProxy' },
   electionProxy: { name: 'electionProxy' },
   auditProxy: { name: 'auditProxy' },
@@ -59,6 +60,7 @@ describe('api-gateway bootstrap', () => {
     expect(useMock).toHaveBeenCalledWith('/api/votes', { name: 'votingProxy' });
     expect(useMock).toHaveBeenCalledWith('/api/chain', { name: 'blockchainProxy' });
     expect(useMock).toHaveBeenCalledWith('/api/results', { name: 'resultsProxy' });
+    expect(useMock).toHaveBeenCalledWith('/api/dashboard', { name: 'dashboardProxy' });
     expect(useMock).toHaveBeenCalledWith('/api/users', { name: 'usersProxy' });
     expect(useMock).toHaveBeenCalledWith('/api/elections', { name: 'electionProxy' });
     expect(useMock).toHaveBeenCalledWith('/api/audit', { name: 'auditProxy' });
