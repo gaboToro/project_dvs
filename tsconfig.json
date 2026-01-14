@@ -49,6 +49,12 @@
       "path": "./election-service"
     },
     {
+      "path": "./audit-log-service-e2e"
+    },
+    {
+      "path": "./audit-log-service"
+    },
+    {
       "path": "./rate-limiter-service-e2e"
     },
     {

@@ -37,13 +37,52 @@ export class AuthController {
         roles: [user.role],
       });
 
+      void this.audit('LOGIN_SUCCESS', user.id, user.role, {
+        username: body.username,
+      });
+
       return { accessToken, tokenType: 'Bearer' };
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 401 || status === 403) {
+        void this.audit('LOGIN_FAILED', undefined, undefined, {
+          username: body.username,
+        });
         throw new UnauthorizedException('Invalid credentials');
       }
+      void this.audit('LOGIN_ERROR', undefined, undefined, {
+        username: body.username,
+      });
       throw new ServiceUnavailableException('User service unavailable');
+    }
+  }
+
+  private async audit(
+    action: string,
+    actorId?: string,
+    actorRole?: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    const auditUrl = process.env.AUDIT_LOG_SERVICE_URL;
+    const token = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!auditUrl || !token) return;
+
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${auditUrl}/api/audit/log`,
+          {
+            actorId,
+            actorRole,
+            action,
+            resource: 'auth',
+            metadata,
+          },
+          { headers: { 'x-internal-token': token } },
+        ),
+      );
+    } catch {
+      // Best effort only.
     }
   }
 }

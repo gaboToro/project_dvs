@@ -16,13 +16,14 @@ describe('proxy.middleware', () => {
     process.env.RESULTS_SERVICE_URL = 'http://results:3004';
     process.env.USER_SERVICE_URL = 'http://users:3005';
     process.env.ELECTION_SERVICE_URL = 'http://election:3006';
+    process.env.AUDIT_LOG_SERVICE_URL = 'http://audit:3007';
   });
 
   it('should create all proxies with correct targets', async () => {
     const mod = await import('./proxy.middleware.js');
 
-    // Ensure createProxyMiddleware was called 6 times
-    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(6);
+    // Ensure createProxyMiddleware was called 7 times
+    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(7);
 
     const calls = createProxyMiddlewareMock.mock.calls.map((c) => c[0]);
 
@@ -34,6 +35,7 @@ describe('proxy.middleware', () => {
       'http://results:3004',
       'http://users:3005',
       'http://election:3006',
+      'http://audit:3007',
     ]);
 
     // Quick sanity: exported proxies exist
@@ -43,6 +45,7 @@ describe('proxy.middleware', () => {
     expect(mod.resultsProxy).toBeDefined();
     expect(mod.usersProxy).toBeDefined();
     expect(mod.electionProxy).toBeDefined();
+    expect(mod.auditProxy).toBeDefined();
   });
 
   it('should rewrite paths correctly', async () => {
@@ -56,6 +59,7 @@ describe('proxy.middleware', () => {
     const results = calls[3];
     const users = calls[4];
     const elections = calls[5];
+    const audit = calls[6];
 
     expect(auth.pathRewrite('/login')).toBe('/api/auth/login');
     expect(votes.pathRewrite('/')).toBe('/api/votes/');
@@ -63,5 +67,6 @@ describe('proxy.middleware', () => {
     expect(results.pathRewrite('/election-2025')).toBe('/api/results/election-2025');
     expect(users.pathRewrite('/eligibility/123')).toBe('/api/users/eligibility/123');
     expect(elections.pathRewrite('/active')).toBe('/api/elections/active');
+    expect(audit.pathRewrite('/log')).toBe('/api/audit/log');
   });
 });

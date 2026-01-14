@@ -1,4 +1,4 @@
-import { IsBoolean, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 
 export type UserRole = 'admin' | 'voter';
 
@@ -6,6 +6,7 @@ export interface UserDto {
   id: string;
   username: string;
   fullName: string;
+  email?: string | null;
   role: UserRole;
   enabled: boolean;
   createdAt: number;
@@ -25,6 +26,10 @@ export class CreateUserRequestDto {
   @MinLength(3)
   fullName!: string;
 
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
   @IsIn(['admin', 'voter'])
   role!: UserRole;
 
@@ -38,6 +43,10 @@ export class UpdateUserRequestDto {
   @IsString()
   @MinLength(3)
   fullName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
   @IsOptional()
   @IsIn(['admin', 'voter'])

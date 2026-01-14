@@ -7,7 +7,7 @@ type RateLimitResponse = {
   resetAt: number;
 };
 
-function getClientIp(req: Request): string {
+function getClientKey(req: Request): string {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string') {
     return forwarded.split(',')[0]?.trim() || 'unknown';
@@ -22,12 +22,12 @@ export async function rateLimitMiddleware(req: Request, res: Response, next: Nex
   if (req.path === '/health') return next();
 
   const enabled = process.env.RATE_LIMITER_ENABLED === 'true';
-  const baseUrl = process.env.RATE_LIMITER_URL;
-  if (!enabled || !baseUrl) return next();
+  if (!enabled) return next();
 
-  const limit = Number(process.env.RATE_LIMITER_LIMIT ?? '100');
+  const baseUrl = process.env.RATE_LIMITER_URL ?? 'http://localhost:3010';
+  const limit = Number(process.env.RATE_LIMITER_LIMIT ?? '60');
   const windowSec = Number(process.env.RATE_LIMITER_WINDOW_SEC ?? '60');
-  const key = `${getClientIp(req)}:${req.path}`;
+  const key = `${getClientKey(req)}:${req.path}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 1000);

@@ -20,6 +20,7 @@ describe('UserService functional', () => {
         id: 'u1',
         username: 'admin',
         full_name: 'Administrador',
+        email: null,
         role: 'admin',
         enabled: true,
         created_at: new Date(),

@@ -35,6 +35,11 @@ describe('AuthService functional', () => {
         });
         return;
       }
+      if (req.method === 'POST' && req.url === '/api/audit/log') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+        return;
+      }
       res.writeHead(404);
       res.end();
     });
@@ -48,6 +53,7 @@ describe('AuthService functional', () => {
     }
     stubUrl = `http://127.0.0.1:${stubAddress.port}`;
     process.env.USER_SERVICE_URL = stubUrl;
+    process.env.AUDIT_LOG_SERVICE_URL = stubUrl;
 
     const { AppModule } = require('./app.module');
 

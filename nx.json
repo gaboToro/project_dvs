@@ -64,6 +64,7 @@
         "results-service-e2e/**/*",
         "user-service-e2e/**/*",
         "election-service-e2e/**/*",
+        "audit-log-service-e2e/**/*",
         "rate-limiter-service-e2e/**/*"
       ]
     },

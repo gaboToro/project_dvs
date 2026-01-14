@@ -55,7 +55,7 @@ export class UsersController {
     const roles = req.user?.roles ?? [];
     if (!roles.includes('admin')) {
       // user normal: solo puede actualizar fullName
-      return this.users.update(id, { fullName: body.fullName });
+      return this.users.update(id, { fullName: body.fullName, email: body.email });
     }
     return this.users.update(id, body);
   }
