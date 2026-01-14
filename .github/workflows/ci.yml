@@ -8,15 +8,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
     env:
-      JWT_SECRET: test-secret
       NX_TERMINAL_UI: "false"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Use Node.js 20 LTS
         uses: actions/setup-node@v4
@@ -31,14 +32,55 @@ jobs:
         run: npx nx format:check
         continue-on-error: true
 
-      - name: Lint
-        run: npx nx run-many -t lint --all
+      - name: Lint (affected)
+        run: npx nx affected -t lint --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
 
-      - name: Test
-        run: npx nx run-many -t test --all
+  test:
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: test-secret
+      NX_TERMINAL_UI: "false"
 
-      - name: Build
-        run: npx nx run-many -t build --all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test (affected)
+        run: npx nx affected -t test --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NX_TERMINAL_UI: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (affected)
+        run: npx nx affected -t build --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
 
   load-test:
     if: github.event_name == 'workflow_dispatch'

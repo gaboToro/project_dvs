@@ -61,7 +61,9 @@
     "user-service",
     "user-service-e2e",
     "election-service",
-    "election-service-e2e"
+    "election-service-e2e",
+    "rate-limiter-service",
+    "rate-limiter-service-e2e"
   ],
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
@@ -78,6 +80,7 @@
     "cron": "^3.1.6",
     "dotenv": "^17.2.3",
     "http-proxy-middleware": "^3.0.5",
+    "ioredis": "^5.3.2",
     "kafkajs": "^2.2.4",
     "mongodb": "^7.0.0",
     "pg": "^8.11.5",
