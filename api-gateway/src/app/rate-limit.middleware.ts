@@ -2,8 +2,8 @@ import type { Request, Response, NextFunction } from 'express';
 
 type RateLimitResponse = {
   allowed: boolean;
-  limit: number;
   remaining: number;
+  limit: number;
   resetAt: number;
 };
 
@@ -13,32 +13,36 @@ function getClientKey(req: Request): string {
     return forwarded.split(',')[0]?.trim() || 'unknown';
   }
   if (Array.isArray(forwarded)) {
-    return forwarded[0] ?? 'unknown';
+    return forwarded[0] || 'unknown';
   }
   return req.ip || req.socket.remoteAddress || 'unknown';
 }
 
-export async function rateLimitMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function rateLimitMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (process.env.RATE_LIMITER_ENABLED === 'false') return next();
   if (req.path === '/health') return next();
 
-  const enabled = process.env.RATE_LIMITER_ENABLED === 'true';
-  if (!enabled) return next();
-
   const baseUrl = process.env.RATE_LIMITER_URL ?? 'http://localhost:3010';
-  const limit = Number(process.env.RATE_LIMITER_LIMIT ?? '60');
-  const windowSec = Number(process.env.RATE_LIMITER_WINDOW_SEC ?? '60');
-  const key = `${getClientKey(req)}:${req.path}`;
+  const limit = Number(process.env.RATE_LIMITER_LIMIT ?? 60);
+  const windowSec = Number(process.env.RATE_LIMITER_WINDOW_SEC ?? 60);
+  const key = getClientKey(req);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1000);
+  const timeoutMs = Number(process.env.RATE_LIMITER_TIMEOUT_MS ?? 600);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const internalToken = process.env.INTERNAL_SERVICE_TOKEN;
     const response = await fetch(`${baseUrl}/api/ratelimit/check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(internalToken ? { 'x-internal-token': internalToken } : {}),
+        ...(process.env.INTERNAL_SERVICE_TOKEN
+          ? { 'x-internal-token': process.env.INTERNAL_SERVICE_TOKEN }
+          : {}),
       },
       body: JSON.stringify({ key, limit, windowSec }),
       signal: controller.signal,
@@ -48,16 +52,14 @@ export async function rateLimitMiddleware(req: Request, res: Response, next: Nex
       return next();
     }
 
-    const payload = (await response.json()) as RateLimitResponse;
-    res.setHeader('X-RateLimit-Limit', String(payload.limit));
-    res.setHeader('X-RateLimit-Remaining', String(payload.remaining));
-    res.setHeader('X-RateLimit-Reset', String(payload.resetAt));
+    const data = (await response.json()) as RateLimitResponse;
+    res.setHeader('x-ratelimit-limit', String(data.limit));
+    res.setHeader('x-ratelimit-remaining', String(data.remaining));
+    res.setHeader('x-ratelimit-reset', String(data.resetAt));
 
-    if (!payload.allowed) {
-      return res.status(429).json({
-        statusCode: 429,
-        message: 'Too many requests',
-      });
+    if (!data.allowed) {
+      res.status(429).json({ message: 'Too many requests' });
+      return;
     }
 
     return next();
