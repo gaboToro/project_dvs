@@ -33,7 +33,7 @@ jobs:
         continue-on-error: true
 
       - name: Lint (affected)
-        run: npx nx affected -t lint --parallel=3 --base=origin/${{ github.base_ref || github.ref_name }} --head=HEAD
+        run: npx nx affected -t lint --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
 
   test:
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
         run: npm ci
 
       - name: Test (affected)
-        run: npx nx affected -t test --parallel=3 --base=origin/${{ github.base_ref || github.ref_name }} --head=HEAD
+        run: npx nx affected -t test --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
 
   build:
     runs-on: ubuntu-latest
@@ -80,7 +80,7 @@ jobs:
         run: npm ci
 
       - name: Build (affected)
-        run: npx nx affected -t build --parallel=3 --base=origin/${{ github.base_ref || github.ref_name }} --head=HEAD
+        run: npx nx affected -t build --parallel=3 --base=${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }} --head=${{ github.sha }}
 
   load-test:
     if: github.event_name == 'workflow_dispatch'
