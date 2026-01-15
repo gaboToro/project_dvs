@@ -71,6 +71,12 @@
     },
     {
       "path": "./email-notifier-service"
+    },
+    {
+      "path": "./reporting-service-e2e"
+    },
+    {
+      "path": "./reporting-service"
     }
   ]
 }

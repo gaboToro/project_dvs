@@ -27,6 +27,7 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - election-service (3006)
 - audit-log-service (3007)
 - email-notifier-service (3009)
+- reporting-service (3012)
 
 ## Frontend app (Expo)
 Single Expo app lives under `apps/dvs-app` with voter, admin, and results flows.
@@ -70,6 +71,7 @@ API base URL:
    - npx nx serve election-service
    - npx nx serve audit-log-service
    - npx nx serve email-notifier-service
+   - npx nx serve reporting-service
    - npx nx serve api-gateway
 
 ## Demo flow (via API Gateway)
@@ -130,3 +132,4 @@ API base URL:
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
 - users.email is optional and can be updated by the user profile.
 - email-notifier-service consumes RabbitMQ queue `emails.send` and sends SMTP emails.
+- reporting-service exposes CSV export at `/api/reports/elections.csv`.
