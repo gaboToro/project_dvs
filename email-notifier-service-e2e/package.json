@@ -1,0 +1,26 @@
+{
+  "name": "@org/email-notifier-service-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@org/email-notifier-service"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "email-notifier-service-e2e/jest.config.cts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@org/email-notifier-service:build",
+          "@org/email-notifier-service:serve"
+        ]
+      }
+    }
+  }
+}

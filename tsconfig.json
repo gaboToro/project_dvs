@@ -65,6 +65,12 @@
     },
     {
       "path": "./dashboard-service-e2e"
+    },
+    {
+      "path": "./email-notifier-service-e2e"
+    },
+    {
+      "path": "./email-notifier-service"
     }
   ]
 }

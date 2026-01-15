@@ -51,6 +51,9 @@ describe('VotingController', () => {
     (query as jest.Mock).mockReset();
     (query as jest.Mock).mockImplementation((text: string) => {
       if (text.includes('SELECT id FROM votes')) return [];
+      if (text.includes('SELECT full_name, email FROM users')) {
+        return [{ full_name: 'Voter Demo', email: 'voter@example.com' }];
+      }
       if (text.includes('INSERT INTO votes')) return [{ id: 'vote-1', cast_at: new Date() }];
       return [];
     });

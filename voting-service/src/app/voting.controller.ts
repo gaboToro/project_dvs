@@ -108,6 +108,7 @@ export class VotingController {
         voteId,
         castAt,
       };
+      void this.sendVoteConfirmation(voterId, body.electionId, body.candidateId);
       void this.audit('VOTE_CAST', voterId, 'voter', {
         electionId: body.electionId,
         candidateId: body.candidateId,
@@ -133,6 +134,39 @@ export class VotingController {
   private hashVoter(voterId: string): string {
     const secret = process.env.VOTER_HASH_SECRET ?? 'dev-voter-hash-secret';
     return createHash('sha256').update(`${voterId}:${secret}`).digest('hex');
+  }
+
+  private async sendVoteConfirmation(voterId: string, electionId: string, candidateId: string) {
+    const emailServiceUrl = process.env.EMAIL_NOTIFIER_SERVICE_URL ?? 'http://localhost:3009';
+    const token = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!token) return;
+
+    try {
+      const rows = await query<{ full_name: string; email: string | null }>(
+        'SELECT full_name, email FROM users WHERE id = $1 LIMIT 1',
+        [voterId],
+      );
+      const user = rows[0];
+      if (!user?.email) return;
+
+      const subject = 'CONFIRMACIÓN DE VOTO (DVS)';
+      const text = `Estimad@ ${user.full_name}\nTu voto se ha realizado con éxito, muchas gracias.`;
+
+      await firstValueFrom(
+        this.http.post(
+          `${emailServiceUrl}/api/email/send`,
+          {
+            to: user.email,
+            subject,
+            text,
+            html: `<p>Estimad@ ${user.full_name}</p><p>Tu voto se ha realizado con éxito, muchas gracias.</p>`,
+          },
+          { headers: { 'x-internal-token': token } },
+        ),
+      );
+    } catch {
+      // Best effort only.
+    }
   }
 
   private async assertElectionOpen(electionId: string, candidateId: string) {
