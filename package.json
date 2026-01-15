@@ -70,7 +70,9 @@
     "rate-limiter-service-e2e",
     "audit-log-service-e2e",
     "email-notifier-service",
-    "email-notifier-service-e2e"
+    "email-notifier-service-e2e",
+    "reporting-service",
+    "reporting-service-e2e"
   ],
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

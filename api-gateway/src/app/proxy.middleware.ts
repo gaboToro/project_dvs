@@ -6,6 +6,7 @@ const BLOCKCHAIN = process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003'
 const RESULTS = process.env.RESULTS_SERVICE_URL ?? 'http://localhost:3004';
 const DASHBOARD = process.env.DASHBOARD_SERVICE_URL ?? 'http://localhost:3008';
 const EMAIL = process.env.EMAIL_NOTIFIER_SERVICE_URL ?? 'http://localhost:3009';
+const REPORTING = process.env.REPORTING_SERVICE_URL ?? 'http://localhost:3012';
 const USERS = process.env.USER_SERVICE_URL ?? 'http://localhost:3005';
 const ELECTION = process.env.ELECTION_SERVICE_URL ?? 'http://localhost:3006';
 const AUDIT = process.env.AUDIT_LOG_SERVICE_URL ?? 'http://localhost:3007';
@@ -44,6 +45,12 @@ export const emailProxy = createProxyMiddleware({
   target: EMAIL,
   changeOrigin: true,
   pathRewrite: (path) => `/api/email${path}`,
+});
+
+export const reportingProxy = createProxyMiddleware({
+  target: REPORTING,
+  changeOrigin: true,
+  pathRewrite: (path) => `/api/reports${path}`,
 });
 
 export const usersProxy = createProxyMiddleware({
