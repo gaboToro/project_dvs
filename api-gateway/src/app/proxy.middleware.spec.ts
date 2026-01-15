@@ -15,6 +15,7 @@ describe('proxy.middleware', () => {
     process.env.BLOCKCHAIN_SERVICE_URL = 'http://bc:3003';
     process.env.RESULTS_SERVICE_URL = 'http://results:3004';
     process.env.DASHBOARD_SERVICE_URL = 'http://dashboard:3008';
+    process.env.EMAIL_NOTIFIER_SERVICE_URL = 'http://email:3009';
     process.env.USER_SERVICE_URL = 'http://users:3005';
     process.env.ELECTION_SERVICE_URL = 'http://election:3006';
     process.env.AUDIT_LOG_SERVICE_URL = 'http://audit:3007';
@@ -23,8 +24,8 @@ describe('proxy.middleware', () => {
   it('should create all proxies with correct targets', async () => {
     const mod = await import('./proxy.middleware.js');
 
-    // Ensure createProxyMiddleware was called 8 times
-    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(8);
+    // Ensure createProxyMiddleware was called 9 times
+    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(9);
 
     const calls = createProxyMiddlewareMock.mock.calls.map((c) => c[0]);
 
@@ -35,6 +36,7 @@ describe('proxy.middleware', () => {
       'http://bc:3003',
       'http://results:3004',
       'http://dashboard:3008',
+      'http://email:3009',
       'http://users:3005',
       'http://election:3006',
       'http://audit:3007',
@@ -46,6 +48,7 @@ describe('proxy.middleware', () => {
     expect(mod.blockchainProxy).toBeDefined();
     expect(mod.resultsProxy).toBeDefined();
     expect(mod.dashboardProxy).toBeDefined();
+    expect(mod.emailProxy).toBeDefined();
     expect(mod.usersProxy).toBeDefined();
     expect(mod.electionProxy).toBeDefined();
     expect(mod.auditProxy).toBeDefined();
@@ -61,15 +64,17 @@ describe('proxy.middleware', () => {
     const chain = calls[2];
     const results = calls[3];
     const dashboard = calls[4];
-    const users = calls[5];
-    const elections = calls[6];
-    const audit = calls[7];
+    const email = calls[5];
+    const users = calls[6];
+    const elections = calls[7];
+    const audit = calls[8];
 
     expect(auth.pathRewrite('/login')).toBe('/api/auth/login');
     expect(votes.pathRewrite('/')).toBe('/api/votes/');
     expect(chain.pathRewrite('/add')).toBe('/api/chain/add');
     expect(results.pathRewrite('/election-2025')).toBe('/api/results/election-2025');
     expect(dashboard.pathRewrite('/demo-2025')).toBe('/api/dashboard/demo-2025');
+    expect(email.pathRewrite('/send')).toBe('/api/email/send');
     expect(users.pathRewrite('/eligibility/123')).toBe('/api/users/eligibility/123');
     expect(elections.pathRewrite('/active')).toBe('/api/elections/active');
     expect(audit.pathRewrite('/log')).toBe('/api/audit/log');

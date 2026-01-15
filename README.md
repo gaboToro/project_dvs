@@ -26,6 +26,7 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - user-service (3005)
 - election-service (3006)
 - audit-log-service (3007)
+- email-notifier-service (3009)
 
 ## Frontend app (Expo)
 Single Expo app lives under `apps/dvs-app` with voter, admin, and results flows.
@@ -53,6 +54,8 @@ API base URL:
      - SUPABASE_URL
      - SUPABASE_SERVICE_ROLE_KEY
    - Mongo credentials in .env match docker-compose (user: dvs_user, pass: dvs_pass_123).
+   - SMTP (email-notifier-service):
+     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE, SMTP_FROM
 
 4) Apply Supabase migration
    - Run `supabase/migrations/20251230065442_remote_schema.sql` in Supabase SQL Editor.
@@ -66,6 +69,7 @@ API base URL:
    - npx nx serve dashboard-service
    - npx nx serve election-service
    - npx nx serve audit-log-service
+   - npx nx serve email-notifier-service
    - npx nx serve api-gateway
 
 ## Demo flow (via API Gateway)
@@ -125,3 +129,4 @@ API base URL:
 ## Notes
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
 - users.email is optional and can be updated by the user profile.
+- email-notifier-service consumes RabbitMQ queue `emails.send` and sends SMTP emails.

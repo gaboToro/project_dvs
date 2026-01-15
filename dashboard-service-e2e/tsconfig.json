@@ -12,5 +12,9 @@
     "src/**/*.ts",
     "../results-service/src/**/*.ts"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../dashboard-service"
+    }
+  ]
 }
