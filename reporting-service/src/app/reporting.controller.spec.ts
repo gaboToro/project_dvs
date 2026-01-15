@@ -31,10 +31,10 @@ describe('ReportingController', () => {
   });
 
   it('returns csv response', async () => {
-    const res = {
+    const res: { setHeader: jest.Mock; send: jest.Mock } = {
       setHeader: jest.fn(),
       send: jest.fn(),
-    } as any;
+    };
 
     await controller.electionsCsv(res, 'OPEN');
 

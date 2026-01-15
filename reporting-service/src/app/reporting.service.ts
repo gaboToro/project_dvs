@@ -125,7 +125,7 @@ export class ReportingService {
     if (value === null || value === undefined) return '';
     const text = String(value);
     if (text.includes(',') || text.includes('"') || text.includes('\n')) {
-      return `"${text.replace(/\"/g, '""')}"`;
+      return `"${text.replace(/"/g, '""')}"`;
     }
     return text;
   }
