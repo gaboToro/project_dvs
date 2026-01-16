@@ -37,13 +37,13 @@ describe('proxy.middleware', () => {
       'http://voting:3002',
       'http://bc:3003',
       'http://results:3004',
+      'http://dashboard:3008',
+      'http://email:3009',
+      'http://reporting:3012',
+      'http://backup:3011',
       'http://users:3005',
       'http://election:3006',
       'http://audit:3007',
-      'http://dashboard:3008',
-      'http://email:3009',
-      'http://backup:3011',
-      'http://reporting:3012',
     ]);
 
     // Quick sanity: exported proxies exist
