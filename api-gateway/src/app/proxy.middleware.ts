@@ -4,12 +4,13 @@ const AUTH = process.env.AUTH_SERVICE_URL ?? 'http://localhost:3001';
 const VOTING = process.env.VOTING_SERVICE_URL ?? 'http://localhost:3002';
 const BLOCKCHAIN = process.env.BLOCKCHAIN_SERVICE_URL ?? 'http://localhost:3003';
 const RESULTS = process.env.RESULTS_SERVICE_URL ?? 'http://localhost:3004';
-const DASHBOARD = process.env.DASHBOARD_SERVICE_URL ?? 'http://localhost:3008';
-const EMAIL = process.env.EMAIL_NOTIFIER_SERVICE_URL ?? 'http://localhost:3009';
-const REPORTING = process.env.REPORTING_SERVICE_URL ?? 'http://localhost:3012';
 const USERS = process.env.USER_SERVICE_URL ?? 'http://localhost:3005';
 const ELECTION = process.env.ELECTION_SERVICE_URL ?? 'http://localhost:3006';
 const AUDIT = process.env.AUDIT_LOG_SERVICE_URL ?? 'http://localhost:3007';
+const DASHBOARD = process.env.DASHBOARD_SERVICE_URL ?? 'http://localhost:3008';
+const EMAIL = process.env.EMAIL_NOTIFIER_SERVICE_URL ?? 'http://localhost:3009';
+const BACKUP = process.env.SCHEDULER_BACKUP_SERVICE_URL ?? 'http://localhost:3011';
+const REPORTING = process.env.REPORTING_SERVICE_URL ?? 'http://localhost:3012';
 
 export const authProxy = createProxyMiddleware({
   target: AUTH,
@@ -51,6 +52,12 @@ export const reportingProxy = createProxyMiddleware({
   target: REPORTING,
   changeOrigin: true,
   pathRewrite: (path) => `/api/reports${path}`,
+});
+
+export const backupProxy = createProxyMiddleware({
+  target: BACKUP,
+  changeOrigin: true,
+  pathRewrite: (path) => `/api/backup${path}`,
 });
 
 export const usersProxy = createProxyMiddleware({

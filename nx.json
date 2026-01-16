@@ -68,7 +68,8 @@
         "rate-limiter-service-e2e/**/*",
         "dashboard-service-e2e/**/*",
         "email-notifier-service-e2e/**/*",
-        "reporting-service-e2e/**/*"
+        "reporting-service-e2e/**/*",
+        "scheduler-backup-service-e2e/**/*"
       ]
     },
     {

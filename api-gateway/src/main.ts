@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { authProxy, votingProxy, blockchainProxy, resultsProxy, dashboardProxy, emailProxy, reportingProxy, usersProxy, electionProxy, auditProxy } from './app/proxy.middleware';
+import { authProxy, votingProxy, blockchainProxy, resultsProxy, dashboardProxy, emailProxy, reportingProxy, backupProxy, usersProxy, electionProxy, auditProxy } from './app/proxy.middleware';
 import { rateLimitMiddleware } from './app/rate-limit.middleware';
 import { createAuditMiddleware } from './app/audit.middleware';
 import { JwtService } from '@nestjs/jwt';
@@ -27,6 +27,7 @@ async function bootstrap() {
   app.use('/api/dashboard', dashboardProxy);
   app.use('/api/email', emailProxy);
   app.use('/api/reports', reportingProxy);
+  app.use('/api/backup', backupProxy);
   app.use('/api/users', usersProxy);
   app.use('/api/elections', electionProxy);
   app.use('/api/audit', auditProxy);
