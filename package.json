@@ -72,7 +72,9 @@
     "email-notifier-service",
     "email-notifier-service-e2e",
     "reporting-service",
-    "reporting-service-e2e"
+    "reporting-service-e2e",
+    "scheduler-backup-service",
+    "scheduler-backup-service-e2e"
   ],
   "dependencies": {
     "@nestjs/axios": "^4.0.1",

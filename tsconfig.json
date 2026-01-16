@@ -77,6 +77,12 @@
     },
     {
       "path": "./reporting-service"
+    },
+    {
+      "path": "./scheduler-backup-service-e2e"
+    },
+    {
+      "path": "./scheduler-backup-service"
     }
   ]
 }
