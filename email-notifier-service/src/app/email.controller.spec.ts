@@ -52,3 +52,4 @@ describe('EmailController', () => {
     expect(queueMock.publish).toHaveBeenCalled();
   });
 });
+/// <reference types="jest" />
