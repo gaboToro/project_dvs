@@ -142,5 +142,8 @@ API base URL:
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
 - users.email is optional and can be updated by the user profile.
 - email-notifier-service consumes RabbitMQ queue `emails.send` and sends SMTP emails.
-- reporting-service exposes CSV export at `/api/reports/elections.csv`.
+- reporting-service exposes CSV export at `/api/reports/elections.csv` (sync) and async jobs at:
+  - POST `/api/reports/elections` -> `{ jobId }`
+  - GET `/api/reports/:jobId`
+  - GET `/api/reports/:jobId/download`
 - scheduler-backup-service runs scheduled backups and exposes `/api/backup/run` (internal).
