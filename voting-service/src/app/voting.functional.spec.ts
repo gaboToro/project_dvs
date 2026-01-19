@@ -1,3 +1,4 @@
+// test funcional / functional test
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,7 @@ jest.mock('./db/postgres', () => ({
   query: jest.fn(),
 }));
 
+// Suite: VotingService functional - agrupa pruebas relacionadas / Suite: VotingService functional - grouping of related tests
 describe('VotingService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
@@ -21,6 +23,7 @@ describe('VotingService functional', () => {
     get: jest.fn(),
   };
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
     process.env.VOTER_HASH_SECRET = 'test-hash';
@@ -67,10 +70,12 @@ describe('VotingService functional', () => {
     baseUrl = `http://127.0.0.1:${address.port}`;
   });
 
+  // Limpieza (afterAll) - limpia el estado y los mocks / Teardown (afterAll) - cleanup state and mocks
   afterAll(async () => {
     await app.close();
   });
 
+  // Caso de prueba: casts a vote when blockchain accepts it - comportamiento esperado bajo condiciones especificas / Test case: casts a vote when blockchain accepts it - expected behavior under specific conditions
   it('casts a vote when blockchain accepts it', async () => {
     const token = await jwt.signAsync({ sub: 'voter-001', roles: ['voter'] });
     const res = await fetch(`${baseUrl}/api/votes`, {

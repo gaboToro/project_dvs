@@ -1,3 +1,4 @@
+// test unitario / unit test
 /// <reference types="jest" />
 import { AuditService } from './audit.service';
 import { query } from './db/postgres';
@@ -6,11 +7,14 @@ jest.mock('./db/postgres', () => ({
   query: jest.fn(),
 }));
 
+// Suite: AuditService - agrupa pruebas relacionadas / Suite: AuditService - grouping of related tests
 describe('AuditService', () => {
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(() => {
     (query as jest.Mock).mockReset();
   });
 
+  // Caso de prueba: creates an audit log entry - comportamiento esperado bajo condiciones especificas / Test case: creates an audit log entry - expected behavior under specific conditions
   it('creates an audit log entry', async () => {
     (query as jest.Mock).mockResolvedValueOnce([
       {
@@ -42,6 +46,7 @@ describe('AuditService', () => {
     expect(res.action).toBe('LOGIN');
   });
 
+  // Caso de prueba: lists audit logs with filters - comportamiento esperado bajo condiciones especificas / Test case: lists audit logs with filters - expected behavior under specific conditions
   it('lists audit logs with filters', async () => {
     (query as jest.Mock).mockResolvedValueOnce([
       {

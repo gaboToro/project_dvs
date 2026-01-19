@@ -1,3 +1,4 @@
+// test unitario / unit test
 import { UsersService } from './user.service';
 import { query } from './db/postgres';
 
@@ -5,15 +6,18 @@ jest.mock('./db/postgres', () => ({
   query: jest.fn(),
 }));
 
+// Suite: UsersService - agrupa pruebas relacionadas / Suite: UsersService - grouping of related tests
 describe('UsersService', () => {
   let svc: UsersService;
 
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(async () => {
     process.env.SEED_DEFAULT_USERS = 'false';
     svc = new UsersService();
     await svc.onModuleInit();
   });
 
+  // Caso de prueba: should list users - comportamiento esperado bajo condiciones especificas / Test case: should list users - expected behavior under specific conditions
   it('should list users', async () => {
     (query as jest.Mock).mockResolvedValueOnce([
       {
@@ -31,6 +35,7 @@ describe('UsersService', () => {
     expect(list.length).toBeGreaterThanOrEqual(1);
   });
 
+  // Caso de prueba: should create and fetch user - comportamiento esperado bajo condiciones especificas / Test case: should create and fetch user - expected behavior under specific conditions
   it('should create and fetch user', async () => {
     const username = `newuser-${Date.now()}`;
     (query as jest.Mock)
@@ -73,6 +78,7 @@ describe('UsersService', () => {
     expect(fetched.enabled).toBe(true);
   });
 
+  // Caso de prueba: eligibility should be false for non-voter - comportamiento esperado bajo condiciones especificas / Test case: eligibility should be false for non-voter - expected behavior under specific conditions
   it('eligibility should be false for non-voter', async () => {
     (query as jest.Mock).mockResolvedValueOnce([
       {

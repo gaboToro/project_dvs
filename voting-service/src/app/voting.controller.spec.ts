@@ -1,3 +1,4 @@
+// test unitario / unit test
 import { Test } from '@nestjs/testing';
 import { VotingController } from './voting.controller';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,7 @@ jest.mock('./db/postgres', () => ({
   query: jest.fn(),
 }));
 
+// Suite: VotingController - agrupa pruebas relacionadas / Suite: VotingController - grouping of related tests
 describe('VotingController', () => {
   let controller: VotingController;
 
@@ -24,6 +26,7 @@ describe('VotingController', () => {
     get: jest.fn(),
   };
 
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(async () => {
     process.env.JWT_SECRET = 'test-secret';
     process.env.BLOCKCHAIN_SERVICE_URL = 'http://localhost:3003';
@@ -69,16 +72,19 @@ describe('VotingController', () => {
     controller = moduleRef.get(VotingController);
   });
 
+  // Limpieza (afterEach) - limpia el estado y los mocks / Teardown (afterEach) - cleanup state and mocks
   afterEach(() => {
     jest.clearAllMocks();
   });
 
+  // Caso de prueba: should reject missing Bearer token - comportamiento esperado bajo condiciones especificas / Test case: should reject missing Bearer token - expected behavior under specific conditions
   it('should reject missing Bearer token', async () => {
     await expect(
       controller.castVote(undefined, undefined, { electionId: 'e1', candidateId: 'c1' } as any),
     ).rejects.toHaveProperty('status', 401);
   });
 
+  // Caso de prueba: should accept vote and anchor to blockchain - comportamiento esperado bajo condiciones especificas / Test case: should accept vote and anchor to blockchain - expected behavior under specific conditions
   it('should accept vote and anchor to blockchain', async () => {
     const res = await controller.castVote(
       'Bearer token',
@@ -92,6 +98,7 @@ describe('VotingController', () => {
     expect(jwtMock.verifyAsync).toHaveBeenCalled();
   });
 
+  // Caso de prueba: should reject vote when blockchain is down - comportamiento esperado bajo condiciones especificas / Test case: should reject vote when blockchain is down - expected behavior under specific conditions
   it('should reject vote when blockchain is down', async () => {
     httpMock.post.mockReturnValueOnce(
       throwError(() => Object.assign(new Error('ECONNREFUSED'), { code: 'ECONNREFUSED' })),

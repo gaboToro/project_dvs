@@ -1,7 +1,9 @@
+// test unitario / unit test
 import { Test } from '@nestjs/testing';
 import { BlockchainController } from './blockchain.controller';
 import { BlockchainService } from './blockchain.service';
 
+// Suite: BlockchainController - agrupa pruebas relacionadas / Suite: BlockchainController - grouping of related tests
 describe('BlockchainController', () => {
   let controller: BlockchainController;
 
@@ -11,6 +13,7 @@ describe('BlockchainController', () => {
     getChain: jest.fn().mockReturnValue([{ index: 0, hash: 'genesis' }]),
   };
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [BlockchainController],
@@ -20,6 +23,7 @@ describe('BlockchainController', () => {
     controller = moduleRef.get(BlockchainController);
   });
 
+  // Caso de prueba: POST add should return new block - comportamiento esperado bajo condiciones especificas / Test case: POST add should return new block - expected behavior under specific conditions
   it('POST add should return new block', () => {
     const res = controller.add({
       voterId: 'u1',
@@ -32,6 +36,7 @@ describe('BlockchainController', () => {
     expect(res.block).toHaveProperty('hash');
   });
 
+  // Caso de prueba: POST verify should return valid true - comportamiento esperado bajo condiciones especificas / Test case: POST verify should return valid true - expected behavior under specific conditions
   it('POST verify should return valid true', () => {
     expect(controller.verify()).toEqual({ valid: true });
   });

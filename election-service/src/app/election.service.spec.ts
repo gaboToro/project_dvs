@@ -1,3 +1,4 @@
+// test unitario / unit test
 const supabaseClientMock = {
   getSupabaseAdmin: jest.fn(),
 };
@@ -57,7 +58,9 @@ function makeSupabaseMock() {
   return { supabase, builder, state };
 }
 
+// Suite: ElectionService (unit) - agrupa pruebas relacionadas / Suite: ElectionService (unit) - grouping of related tests
 describe('ElectionService (unit)', () => {
+  // Caso de prueba: should enforce single OPEN election rule - comportamiento esperado bajo condiciones especificas / Test case: should enforce single OPEN election rule - expected behavior under specific conditions
   it('should enforce single OPEN election rule', async () => {
     const { supabase, state } = makeSupabaseMock();
     supabaseClientMock.getSupabaseAdmin.mockReturnValue(supabase);
@@ -70,6 +73,7 @@ describe('ElectionService (unit)', () => {
     await expect(svc.openElection('target')).rejects.toThrow('There is already an OPEN election');
   });
 
+  // Caso de prueba: should open election when no other OPEN election exists - comportamiento esperado bajo condiciones especificas / Test case: should open election when no other OPEN election exists - expected behavior under specific conditions
   it('should open election when no other OPEN election exists', async () => {
     const { supabase, state } = makeSupabaseMock();
     supabaseClientMock.getSupabaseAdmin.mockReturnValue(supabase);
@@ -87,6 +91,7 @@ describe('ElectionService (unit)', () => {
     expect(res).toBeTruthy();
   });
 
+  // Caso de prueba: should close election (happy path) - comportamiento esperado bajo condiciones especificas / Test case: should close election (happy path) - expected behavior under specific conditions
   it('should close election (happy path)', async () => {
     const { supabase, state, builder } = makeSupabaseMock();
     supabaseClientMock.getSupabaseAdmin.mockReturnValue(supabase);
@@ -102,6 +107,7 @@ describe('ElectionService (unit)', () => {
     expect(res).toBeTruthy();
   });
 
+  // Caso de prueba: should NOT open election without candidates - comportamiento esperado bajo condiciones especificas / Test case: should NOT open election without candidates - expected behavior under specific conditions
   it('should NOT open election without candidates', async () => {
     const { supabase, state } = makeSupabaseMock();
     supabaseClientMock.getSupabaseAdmin.mockReturnValue(supabase);

@@ -1,10 +1,13 @@
+// test unitario / unit test
 const createProxyMiddlewareMock = jest.fn((opts) => ({ __proxy_opts: opts }));
 
 jest.mock('http-proxy-middleware', () => ({
   createProxyMiddleware: (opts: any) => createProxyMiddlewareMock(opts),
 }));
 
+// Suite: proxy.middleware - agrupa pruebas relacionadas / Suite: proxy.middleware - grouping of related tests
 describe('proxy.middleware', () => {
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(() => {
     jest.resetModules();
     createProxyMiddlewareMock.mockClear();
@@ -23,6 +26,7 @@ describe('proxy.middleware', () => {
     process.env.REPORTING_SERVICE_URL = 'http://reporting:3012';
   });
 
+  // Caso de prueba: should create all proxies with correct targets - comportamiento esperado bajo condiciones especificas / Test case: should create all proxies with correct targets - expected behavior under specific conditions
   it('should create all proxies with correct targets', async () => {
     const mod = await import('./proxy.middleware.js');
 
@@ -60,6 +64,7 @@ describe('proxy.middleware', () => {
     expect(mod.auditProxy).toBeDefined();
   });
 
+  // Caso de prueba: should rewrite paths correctly - comportamiento esperado bajo condiciones especificas / Test case: should rewrite paths correctly - expected behavior under specific conditions
   it('should rewrite paths correctly', async () => {
     await import('./proxy.middleware.js');
 

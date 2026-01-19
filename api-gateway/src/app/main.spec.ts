@@ -1,3 +1,4 @@
+// test unitario / unit test
 /**
  * Unit test for main.ts bootstrap.
  * We mock NestFactory to verify routing middleware is registered.
@@ -43,7 +44,9 @@ jest.mock('./rate-limit.middleware', () => ({
   rateLimitMiddleware: { name: 'rateLimitMiddleware' },
 }));
 
+// Suite: api-gateway bootstrap - agrupa pruebas relacionadas / Suite: api-gateway bootstrap - grouping of related tests
 describe('api-gateway bootstrap', () => {
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(() => {
     jest.resetModules();
     useMock.mockClear();
@@ -53,6 +56,7 @@ describe('api-gateway bootstrap', () => {
     process.env.PORT = '3000';
   });
 
+  // Caso de prueba: should register proxy routes and start listening - comportamiento esperado bajo condiciones especificas / Test case: should register proxy routes and start listening - expected behavior under specific conditions
   it('should register proxy routes and start listening', async () => {
     // Importing main.ts should run bootstrap()
     await import('../main.js');
