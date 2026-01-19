@@ -93,7 +93,7 @@ describe('VotingController', () => {
   });
 
   it('should reject vote when blockchain is down', async () => {
-    httpMock.post.mockImplementationOnce(
+    httpMock.post.mockReturnValueOnce(
       throwError(() => Object.assign(new Error('ECONNREFUSED'), { code: 'ECONNREFUSED' })),
     );
 

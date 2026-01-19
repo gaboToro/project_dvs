@@ -1,11 +1,17 @@
 import { Test } from '@nestjs/testing';
 import { ReportingController } from './reporting.controller';
 import { ReportingService } from './reporting.service';
+import { ReportingJobsService } from './reporting.jobs.service';
 
 describe('ReportingController', () => {
   let controller: ReportingController;
   const reportingMock = {
     buildElectionSummaryCsv: jest.fn().mockResolvedValue('csv-data'),
+  };
+  const jobsMock = {
+    requestElectionReport: jest.fn(),
+    getJob: jest.fn(),
+    getDownloadUrl: jest.fn(),
   };
 
   beforeAll(async () => {
@@ -15,6 +21,10 @@ describe('ReportingController', () => {
         {
           provide: ReportingService,
           useValue: reportingMock,
+        },
+        {
+          provide: ReportingJobsService,
+          useValue: jobsMock,
         },
       ],
     }).compile();
@@ -31,10 +41,10 @@ describe('ReportingController', () => {
   });
 
   it('returns csv response', async () => {
-    const res: { setHeader: jest.Mock; send: jest.Mock } = {
+    const res = {
       setHeader: jest.fn(),
       send: jest.fn(),
-    };
+    } as any;
 
     await controller.electionsCsv(res, 'OPEN');
 

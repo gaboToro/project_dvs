@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, type QueryResultRow } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.PG_URI,
@@ -10,7 +10,10 @@ const pool = new Pool({
   ssl: process.env.PG_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
-export async function query<T>(text: string, params?: unknown[]): Promise<T[]> {
+export async function query<T extends QueryResultRow>(
+  text: string,
+  params?: unknown[],
+): Promise<T[]> {
   const result = await pool.query<T>(text, params);
   return result.rows;
 }

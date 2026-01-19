@@ -2,6 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "out-tsc/@org/reporting-service-e2e",
+    "rootDir": "..",
     "esModuleInterop": true,
     "noUnusedLocals": false,
     "noImplicitAny": false

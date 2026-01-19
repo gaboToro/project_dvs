@@ -51,3 +51,20 @@ CREATE INDEX IF NOT EXISTS ix_audit_logs_action
 
 CREATE INDEX IF NOT EXISTS ix_audit_logs_resource
   ON audit_logs (resource);
+
+CREATE TABLE IF NOT EXISTS report_jobs (
+  id uuid PRIMARY KEY,
+  type text NOT NULL,
+  status text NOT NULL CHECK (status IN ('PENDING', 'RUNNING', 'DONE', 'FAILED')),
+  params jsonb,
+  s3_bucket text,
+  s3_key text,
+  error text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  started_at timestamptz,
+  finished_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS ix_report_jobs_status
+  ON report_jobs (status);
