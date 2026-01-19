@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import amqplib, { Channel, Connection } from 'amqplib';
+import amqplib, { Channel, ChannelModel } from 'amqplib';
 import type { EmailMessage } from './email.types';
 
 @Injectable()
 export class EmailQueue {
   private readonly logger = new Logger(EmailQueue.name);
-  private connection?: Connection;
+  private connection?: ChannelModel;
   private channel?: Channel;
 
   async publish(message: EmailMessage): Promise<void> {
