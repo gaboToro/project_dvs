@@ -1,13 +1,16 @@
+// test funcional / functional test
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import http from 'http';
 
+// Suite: AuthService functional - agrupa pruebas relacionadas / Suite: AuthService functional - grouping of related tests
 describe('AuthService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
   let stubServer: http.Server;
   let stubUrl: string;
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
     process.env.INTERNAL_SERVICE_TOKEN = 'test-token';
@@ -72,11 +75,13 @@ describe('AuthService functional', () => {
     baseUrl = `http://127.0.0.1:${appAddress.port}`;
   });
 
+  // Limpieza (afterAll) - limpia el estado y los mocks / Teardown (afterAll) - cleanup state and mocks
   afterAll(async () => {
     await app.close();
     await new Promise<void>((resolve) => stubServer.close(() => resolve()));
   });
 
+  // Caso de prueba: responds to health - comportamiento esperado bajo condiciones especificas / Test case: responds to health - expected behavior under specific conditions
   it('responds to health', async () => {
     const res = await fetch(`${baseUrl}/api/auth/health`);
     const body = (await res.json()) as { status: string; service: string };
@@ -85,6 +90,7 @@ describe('AuthService functional', () => {
     expect(body).toEqual({ status: 'ok', service: 'auth-service' });
   });
 
+  // Caso de prueba: logs in with admin credentials - comportamiento esperado bajo condiciones especificas / Test case: logs in with admin credentials - expected behavior under specific conditions
   it('logs in with admin credentials', async () => {
     const res = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',

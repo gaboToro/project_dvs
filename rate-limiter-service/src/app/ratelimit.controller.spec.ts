@@ -1,8 +1,10 @@
+// test unitario / unit test
 /// <reference types="jest" />
 import { Test, TestingModule } from '@nestjs/testing';
 import { RateLimitController } from './ratelimit.controller';
 import { RateLimitService } from './ratelimit.service';
 
+// Suite: RateLimitController - agrupa pruebas relacionadas / Suite: RateLimitController - grouping of related tests
 describe('RateLimitController', () => {
   const limiterMock = {
     check: jest.fn(),
@@ -10,11 +12,13 @@ describe('RateLimitController', () => {
   let moduleRef: TestingModule | undefined;
   let originalToken: string | undefined;
 
+  // Preparacion (beforeEach) - prepara el estado y los mocks / Setup (beforeEach) - prepare test state and mocks
   beforeEach(() => {
     originalToken = process.env.INTERNAL_SERVICE_TOKEN;
     limiterMock.check.mockReset();
   });
 
+  // Limpieza (afterEach) - limpia el estado y los mocks / Teardown (afterEach) - cleanup state and mocks
   afterEach(async () => {
     if (moduleRef) {
       await moduleRef.close();
@@ -28,6 +32,7 @@ describe('RateLimitController', () => {
     }
   });
 
+  // Caso de prueba: returns ok on health - comportamiento esperado bajo condiciones especificas / Test case: returns ok on health - expected behavior under specific conditions
   it('returns ok on health', async () => {
     moduleRef = await Test.createTestingModule({
       controllers: [RateLimitController],
@@ -41,6 +46,7 @@ describe('RateLimitController', () => {
     });
   });
 
+  // Caso de prueba: denies when internal token is invalid - comportamiento esperado bajo condiciones especificas / Test case: denies when internal token is invalid - expected behavior under specific conditions
   it('denies when internal token is invalid', async () => {
     process.env.INTERNAL_SERVICE_TOKEN = 'token';
     moduleRef = await Test.createTestingModule({
@@ -55,6 +61,7 @@ describe('RateLimitController', () => {
     expect(limiterMock.check).not.toHaveBeenCalled();
   });
 
+  // Caso de prueba: delegates to limiter when token ok - comportamiento esperado bajo condiciones especificas / Test case: delegates to limiter when token ok - expected behavior under specific conditions
   it('delegates to limiter when token ok', async () => {
     process.env.INTERNAL_SERVICE_TOKEN = 'token';
     limiterMock.check.mockResolvedValueOnce({

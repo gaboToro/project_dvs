@@ -1,3 +1,4 @@
+// test funcional / functional test
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 
@@ -26,10 +27,12 @@ jest.mock('./supabase.client', () => ({
 
 const { AppModule } = require('./app.module');
 
+// Suite: ElectionService functional - agrupa pruebas relacionadas / Suite: ElectionService functional - grouping of related tests
 describe('ElectionService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
 
@@ -60,10 +63,12 @@ describe('ElectionService functional', () => {
     baseUrl = `http://127.0.0.1:${address.port}`;
   });
 
+  // Limpieza (afterAll) - limpia el estado y los mocks / Teardown (afterAll) - cleanup state and mocks
   afterAll(async () => {
     await app.close();
   });
 
+  // Caso de prueba: responds to health - comportamiento esperado bajo condiciones especificas / Test case: responds to health - expected behavior under specific conditions
   it('responds to health', async () => {
     const res = await fetch(`${baseUrl}/api/elections/health`);
     const body = (await res.json()) as { status: string; service: string };
@@ -72,6 +77,7 @@ describe('ElectionService functional', () => {
     expect(body).toEqual({ status: 'ok', service: 'election-service' });
   });
 
+  // Caso de prueba: lists elections - comportamiento esperado bajo condiciones especificas / Test case: lists elections - expected behavior under specific conditions
   it('lists elections', async () => {
     const res = await fetch(`${baseUrl}/api/elections`);
     const body = (await res.json()) as Array<{ id: string; status: string }>;
