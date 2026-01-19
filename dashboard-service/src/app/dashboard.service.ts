@@ -28,20 +28,19 @@ export class DashboardService {
     const collection = db.collection<DashboardDoc>('dashboard_results');
 
     const now = new Date();
-    const res = await collection.findOneAndUpdate(
+    const doc =
+      (await collection.findOneAndUpdate(
       { electionId: event.electionId },
       {
         $inc: { [`results.${event.candidateId}`]: 1 },
         $set: { lastUpdatedAt: now },
       },
       { upsert: true, returnDocument: 'after' },
-    );
-
-    const doc = res.value ?? {
-      electionId: event.electionId,
-      results: {},
-      lastUpdatedAt: now,
-    };
+    )) ?? {
+        electionId: event.electionId,
+        results: {},
+        lastUpdatedAt: now,
+      };
 
     return {
       electionId: doc.electionId,
