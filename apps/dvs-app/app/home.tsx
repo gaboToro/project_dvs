@@ -164,6 +164,19 @@ export default function HomeScreen() {
             />
           </View>
         ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Blockchain</Text>
+            <Text style={styles.cardText}>
+              Verifica la integridad y el estado de la cadena.
+            </Text>
+            <PrimaryButton
+              label="Ver blockchain"
+              onPress={() => router.push('/admin/blockchain')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
         {showAdminLive ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Resultados en vivo</Text>

@@ -8,9 +8,9 @@ describe('BlockchainController', () => {
   let controller: BlockchainController;
 
   const serviceMock = {
-    addBlock: jest.fn().mockReturnValue({ index: 2, prevHash: 'p', hash: 'h' }),
-    verify: jest.fn().mockReturnValue({ valid: true }),
-    getChain: jest.fn().mockReturnValue([{ index: 0, hash: 'genesis' }]),
+    addBlock: jest.fn().mockResolvedValue({ index: 2, prevHash: 'p', hash: 'h' }),
+    verify: jest.fn().mockResolvedValue({ valid: true }),
+    getChain: jest.fn().mockResolvedValue([{ index: 0, hash: 'genesis' }]),
   };
 
   // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
@@ -24,8 +24,8 @@ describe('BlockchainController', () => {
   });
 
   // Caso de prueba: POST add should return new block - comportamiento esperado bajo condiciones especificas / Test case: POST add should return new block - expected behavior under specific conditions
-  it('POST add should return new block', () => {
-    const res = controller.add({
+  it('POST add should return new block', async () => {
+    const res = await controller.add({
       voterId: 'u1',
       electionId: 'e1',
       candidateId: 'c1',
@@ -37,7 +37,7 @@ describe('BlockchainController', () => {
   });
 
   // Caso de prueba: POST verify should return valid true - comportamiento esperado bajo condiciones especificas / Test case: POST verify should return valid true - expected behavior under specific conditions
-  it('POST verify should return valid true', () => {
-    expect(controller.verify()).toEqual({ valid: true });
+  it('POST verify should return valid true', async () => {
+    await expect(controller.verify()).resolves.toEqual({ valid: true });
   });
 });
