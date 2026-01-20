@@ -45,6 +45,10 @@ export class AuditService {
       values.push(filters.actorId);
       clauses.push(`actor_id = $${values.length}`);
     }
+    if (filters.actorRole) {
+      values.push(filters.actorRole);
+      clauses.push(`actor_role = $${values.length}`);
+    }
     if (filters.action) {
       values.push(filters.action);
       clauses.push(`action = $${values.length}`);
@@ -52,6 +56,10 @@ export class AuditService {
     if (filters.resource) {
       values.push(filters.resource);
       clauses.push(`resource = $${values.length}`);
+    }
+    if (filters.electionId) {
+      values.push(filters.electionId);
+      clauses.push(`metadata->>'electionId' = $${values.length}`);
     }
     if (filters.from) {
       values.push(filters.from);
@@ -63,7 +71,7 @@ export class AuditService {
     }
 
     const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-    const limit = Math.min(Number(filters.limit ?? 50), 200);
+    const limit = Math.min(Number(filters.limit ?? 50), 1000);
     values.push(limit);
 
     const rows = await query<AuditRow>(
