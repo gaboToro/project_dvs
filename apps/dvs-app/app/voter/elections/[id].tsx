@@ -123,7 +123,18 @@ export default function ElectionDetailScreen() {
       <BackButton label="Elecciones" fallbackHref="/voter/elections" />
       <ScrollView contentContainerStyle={styles.content}>
         {statusMessage ? (
-          <View style={[styles.banner, styles[`banner${statusTone}`]]}>
+          <View
+            style={[
+              styles.banner,
+              statusTone === 'error'
+                ? styles.bannererror
+                : statusTone === 'success'
+                  ? styles.bannersuccess
+                  : statusTone === 'warn'
+                    ? styles.bannerwarn
+                    : null,
+            ]}
+          >
             <Text style={styles.bannerText}>{statusMessage}</Text>
           </View>
         ) : null}
