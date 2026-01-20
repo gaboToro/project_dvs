@@ -65,7 +65,7 @@ export default function ResultsIndexScreen() {
       <BackButton label="Inicio" fallbackHref="/home" />
       <View style={styles.header}>
         <Text style={styles.title}>Resultados</Text>
-        <Text style={styles.subtitle}>Consulta el cierre de cada eleccion.</Text>
+        <Text style={styles.subtitle}>Consulta el cierre de cada elección.</Text>
       </View>
 
       <View style={styles.search}>
