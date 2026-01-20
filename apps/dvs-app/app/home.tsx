@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ProfileMenu } from '@/components/ProfileMenu';
@@ -71,7 +71,7 @@ export default function HomeScreen() {
         <ProfileMenu fullName={fullName} />
       </View>
 
-      <View style={styles.cards}>
+      <ScrollView contentContainerStyle={styles.cards}>
         {showVoter ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Votante</Text>
@@ -111,6 +111,32 @@ export default function HomeScreen() {
             />
           </View>
         ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Auditoría</Text>
+            <Text style={styles.cardText}>
+              Revisa la actividad y los eventos registrados.
+            </Text>
+            <PrimaryButton
+              label="Ver auditoría"
+              onPress={() => router.push('/admin/audit')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Reportes</Text>
+            <Text style={styles.cardText}>
+              Genera y descarga reportes del sistema.
+            </Text>
+            <PrimaryButton
+              label="Ir a reportes"
+              onPress={() => router.push('/admin/reports')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
         {showAdminLive ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Resultados en vivo</Text>
@@ -137,9 +163,7 @@ export default function HomeScreen() {
             />
           </View>
         ) : null}
-      </View>
-
-      <View style={styles.footer} />
+      </ScrollView>
     </Screen>
   );
 }
@@ -174,7 +198,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   cards: {
-    marginTop: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
     gap: 14,
   },
   card: {

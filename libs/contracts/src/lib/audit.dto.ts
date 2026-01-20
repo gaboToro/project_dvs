@@ -43,8 +43,10 @@ export class CreateAuditLogRequestDto {
 
 export interface AuditLogQuery {
   actorId?: string;
+  actorRole?: AuditActorRole;
   action?: string;
   resource?: string;
+  electionId?: string;
   from?: string;
   to?: string;
   limit?: number;
