@@ -2,18 +2,12 @@
 import { Test } from '@nestjs/testing';
 import { ReportingController } from './reporting.controller';
 import { ReportingService } from './reporting.service';
-import { ReportingJobsService } from './reporting.jobs.service';
 
 // Suite: ReportingController - agrupa pruebas relacionadas / Suite: ReportingController - grouping of related tests
 describe('ReportingController', () => {
   let controller: ReportingController;
   const reportingMock = {
     buildElectionSummaryCsv: jest.fn().mockResolvedValue('csv-data'),
-  };
-  const jobsMock = {
-    requestElectionReport: jest.fn(),
-    getJob: jest.fn(),
-    getDownloadUrl: jest.fn(),
   };
 
   // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
@@ -24,10 +18,6 @@ describe('ReportingController', () => {
         {
           provide: ReportingService,
           useValue: reportingMock,
-        },
-        {
-          provide: ReportingJobsService,
-          useValue: jobsMock,
         },
       ],
     }).compile();
