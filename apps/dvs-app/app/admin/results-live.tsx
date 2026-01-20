@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 
 import { BackButton } from '@/components/BackButton';
 import { LiveResultsPanel } from '@/components/LiveResultsPanel';
+import { ProfileMenu } from '@/components/ProfileMenu';
 import { Screen } from '@/components/Screen';
 import { apiRequest } from '@/lib/api';
 import { decodeJwtSubject, getRole, getToken } from '@/lib/auth';
@@ -52,10 +53,13 @@ export default function AdminLiveResultsScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.welcome}>
-          BIENVENID@{fullName ? ` ${fullName}` : ''}
-        </Text>
-        <Text style={styles.subtitle}>Resultados en tiempo real.</Text>
+        <View style={styles.headerText}>
+          <Text style={styles.welcome}>
+            BIENVENID@{fullName ? ` ${fullName}` : ''}
+          </Text>
+          <Text style={styles.subtitle}>Resultados en tiempo real.</Text>
+        </View>
+        <ProfileMenu fullName={fullName} />
       </View>
       <LiveResultsPanel
         title="Resultados en vivo"
@@ -72,6 +76,12 @@ export default function AdminLiveResultsScreen() {
 const styles = StyleSheet.create({
   header: {
     gap: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
   },
   welcome: {
     fontFamily: theme.fonts.subheading,

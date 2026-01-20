@@ -2,11 +2,11 @@ import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { BackButton } from '@/components/BackButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { ProfileMenu } from '@/components/ProfileMenu';
 import { Screen } from '@/components/Screen';
 import { apiRequest } from '@/lib/api';
-import { clearToken, decodeJwtSubject, getRole, getToken } from '@/lib/auth';
+import { decodeJwtSubject, getRole, getToken } from '@/lib/auth';
 import { theme } from '@/lib/theme';
 
 type UserProfile = {
@@ -56,21 +56,19 @@ export default function HomeScreen() {
   const showResults = useMemo(() => role === 'voter', [role]);
   const showAdminLive = useMemo(() => role === 'admin', [role]);
 
-  const handleLogout = async () => {
-    await clearToken();
-    router.replace('/login');
-  };
-
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>Panel principal</Text>
-        <Text style={styles.welcome}>
-          BIENVENID@{fullName ? ` ${fullName}` : ''}
-        </Text>
-        <Text style={styles.subtitle}>
-          Selecciona el módulo que quieres utilizar en Digital Voting System.
-        </Text>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Panel principal</Text>
+          <Text style={styles.welcome}>
+            BIENVENID@{fullName ? ` ${fullName}` : ''}
+          </Text>
+          <Text style={styles.subtitle}>
+            Selecciona el módulo que quieres utilizar en Digital Voting System.
+          </Text>
+        </View>
+        <ProfileMenu fullName={fullName} />
       </View>
 
       <View style={styles.cards}>
@@ -96,6 +94,19 @@ export default function HomeScreen() {
             <PrimaryButton
               label="Administrar"
               onPress={() => router.push('/admin/elections')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Usuarios</Text>
+            <Text style={styles.cardText}>
+              Administra accesos y roles de los votantes.
+            </Text>
+            <PrimaryButton
+              label="Gestionar usuarios"
+              onPress={() => router.push('/admin/users')}
               variant="soft"
             />
           </View>
@@ -128,9 +139,7 @@ export default function HomeScreen() {
         ) : null}
       </View>
 
-      <View style={styles.footer}>
-        <PrimaryButton label="Cerrar sesión" onPress={handleLogout} variant="ghost" />
-      </View>
+      <View style={styles.footer} />
     </Screen>
   );
 }
@@ -138,6 +147,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   header: {
     marginTop: 16,
+    gap: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
     gap: 8,
   },
   title: {
