@@ -22,6 +22,7 @@ describe('proxy.middleware', () => {
     process.env.AUDIT_LOG_SERVICE_URL = 'http://audit:3007';
     process.env.DASHBOARD_SERVICE_URL = 'http://dashboard:3008';
     process.env.EMAIL_NOTIFIER_SERVICE_URL = 'http://email:3009';
+    process.env.RATE_LIMITER_URL = 'http://ratelimit:3010';
     process.env.SCHEDULER_BACKUP_SERVICE_URL = 'http://backup:3011';
     process.env.REPORTING_SERVICE_URL = 'http://reporting:3012';
   });
@@ -30,8 +31,8 @@ describe('proxy.middleware', () => {
   it('should create all proxies with correct targets', async () => {
     const mod = await import('./proxy.middleware.js');
 
-    // Ensure createProxyMiddleware was called 11 times
-    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(11);
+    // Ensure createProxyMiddleware was called 12 times
+    expect(createProxyMiddlewareMock).toHaveBeenCalledTimes(12);
 
     const calls = createProxyMiddlewareMock.mock.calls.map((c) => c[0]);
 
@@ -43,6 +44,7 @@ describe('proxy.middleware', () => {
       'http://results:3004',
       'http://dashboard:3008',
       'http://email:3009',
+      'http://ratelimit:3010',
       'http://reporting:3012',
       'http://backup:3011',
       'http://users:3005',
@@ -57,6 +59,7 @@ describe('proxy.middleware', () => {
     expect(mod.resultsProxy).toBeDefined();
     expect(mod.dashboardProxy).toBeDefined();
     expect(mod.emailProxy).toBeDefined();
+    expect(mod.rateLimitProxy).toBeDefined();
     expect(mod.reportingProxy).toBeDefined();
     expect(mod.backupProxy).toBeDefined();
     expect(mod.usersProxy).toBeDefined();
@@ -76,11 +79,12 @@ describe('proxy.middleware', () => {
     const results = calls[3];
     const dashboard = calls[4];
     const email = calls[5];
-    const reporting = calls[6];
-    const backup = calls[7];
-    const users = calls[8];
-    const elections = calls[9];
-    const audit = calls[10];
+    const rateLimit = calls[6];
+    const reporting = calls[7];
+    const backup = calls[8];
+    const users = calls[9];
+    const elections = calls[10];
+    const audit = calls[11];
 
     expect(auth.pathRewrite('/login')).toBe('/api/auth/login');
     expect(votes.pathRewrite('/')).toBe('/api/votes/');
@@ -88,6 +92,7 @@ describe('proxy.middleware', () => {
     expect(results.pathRewrite('/election-2025')).toBe('/api/results/election-2025');
     expect(dashboard.pathRewrite('/demo-2025')).toBe('/api/dashboard/demo-2025');
     expect(email.pathRewrite('/send')).toBe('/api/email/send');
+    expect(rateLimit.pathRewrite('/check')).toBe('/api/ratelimit/check');
     expect(reporting.pathRewrite('/elections.csv')).toBe('/api/reports/elections.csv');
     expect(backup.pathRewrite('/health')).toBe('/api/backup/health');
     expect(users.pathRewrite('/eligibility/123')).toBe('/api/users/eligibility/123');
