@@ -74,21 +74,39 @@ export class UsersService implements OnModuleInit {
   }
 
   async update(id: string, payload: UpdateUserRequestDto): Promise<UserDto> {
+    if (payload.username) {
+      const existing = await query<UserRow>(
+        'SELECT id FROM users WHERE username = $1',
+        [payload.username],
+      );
+      if (existing.length > 0 && existing[0]?.id !== id) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
+
+    const passwordHash = payload.password
+      ? this.hashPassword(payload.password)
+      : null;
+
     const rows = await query<UserRow>(
       `UPDATE users
-       SET full_name = COALESCE($2, full_name),
-           email = COALESCE($3, email),
-           role = COALESCE($4, role),
-           enabled = COALESCE($5, enabled),
+       SET username = COALESCE($2, username),
+           full_name = COALESCE($3, full_name),
+           email = COALESCE($4, email),
+           role = COALESCE($5, role),
+           enabled = COALESCE($6, enabled),
+           password_hash = COALESCE($7, password_hash),
            updated_at = now()
        WHERE id = $1
        RETURNING id, username, full_name, email, role, enabled, created_at, updated_at`,
       [
         id,
+        payload.username ?? null,
         payload.fullName ?? null,
         payload.email ?? null,
         payload.role ?? null,
         payload.enabled ?? null,
+        passwordHash,
       ],
     );
 

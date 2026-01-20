@@ -3,9 +3,10 @@ import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { LiveResultsPanel } from '@/components/LiveResultsPanel';
+import { ProfileMenu } from '@/components/ProfileMenu';
 import { Screen } from '@/components/Screen';
 import { apiRequest } from '@/lib/api';
-import { clearToken, decodeJwtSubject, getRole, getToken } from '@/lib/auth';
+import { decodeJwtSubject, getRole, getToken } from '@/lib/auth';
 import { theme } from '@/lib/theme';
 
 type UserProfile = {
@@ -51,21 +52,17 @@ export default function VoterLiveResultsScreen() {
   const menuItems = [
     { label: 'Votaciones', onPress: () => router.push('/voter/elections') },
     { label: 'Resultados', onPress: () => router.push('/results') },
-    {
-      label: 'Salir',
-      onPress: async () => {
-        await clearToken();
-        router.replace('/login');
-      },
-    },
   ];
 
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.welcome}>
-          BIENVENID@{fullName ? ` ${fullName}` : ''}
-        </Text>
+        <View style={styles.headerText}>
+          <Text style={styles.welcome}>
+            BIENVENID@{fullName ? ` ${fullName}` : ''}
+          </Text>
+        </View>
+        <ProfileMenu fullName={fullName} />
       </View>
       <LiveResultsPanel title="Resultados en vivo" menuItems={menuItems} />
     </Screen>
@@ -75,6 +72,12 @@ export default function VoterLiveResultsScreen() {
 const styles = StyleSheet.create({
   header: {
     gap: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
   },
   welcome: {
     fontFamily: theme.fonts.subheading,
@@ -82,10 +85,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
-  },
-  subtitle: {
-    fontFamily: theme.fonts.body,
-    color: theme.colors.slate,
-    fontSize: 13,
   },
 });
