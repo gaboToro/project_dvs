@@ -42,6 +42,11 @@ export class UpdateUserRequestDto {
   @IsOptional()
   @IsString()
   @MinLength(3)
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
   fullName?: string;
 
   @IsOptional()
@@ -55,6 +60,11 @@ export class UpdateUserRequestDto {
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  password?: string;
 }
 
 export interface EligibilityResponseDto {
