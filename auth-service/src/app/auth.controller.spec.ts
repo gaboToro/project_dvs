@@ -59,10 +59,13 @@ describe('AuthController', () => {
       .mockReturnValueOnce(of({ data: { ok: true } }));
     const res = await controller.login({ username: 'admin', password: 'admin123' } as any);
 
-    expect(jwtMock.signAsync).toHaveBeenCalledWith({
-      sub: 'admin-id',
-      roles: ['admin'],
-    });
+    expect(jwtMock.signAsync).toHaveBeenCalledWith(
+      {
+        sub: 'admin-id',
+        roles: ['admin'],
+      },
+      { expiresIn: '5m' },
+    );
 
     expect(res).toEqual({
       accessToken: 'test.jwt.token',

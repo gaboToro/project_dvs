@@ -3,3 +3,6 @@ export const API_BASE_URL =
 
 export const DASHBOARD_WS_URL =
   process.env.EXPO_PUBLIC_DASHBOARD_WS_URL ?? 'http://localhost:3008/dashboard';
+
+export const INTERNAL_SERVICE_TOKEN =
+  process.env.EXPO_PUBLIC_INTERNAL_SERVICE_TOKEN ?? '';

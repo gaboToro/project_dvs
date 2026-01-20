@@ -9,7 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import { getToken } from '@/lib/auth';
+import { clearToken, getToken, isTokenExpired } from '@/lib/auth';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,6 +34,12 @@ export default function RootLayout() {
       const token = await getToken();
       if (!active) return;
       const isLogin = pathname === '/login';
+      if (token && isTokenExpired(token)) {
+        await clearToken();
+        if (!active) return;
+        router.replace('/login');
+        return;
+      }
       if (!token && !isLogin) {
         router.replace('/login');
         return;
