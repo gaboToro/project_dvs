@@ -137,6 +137,33 @@ export default function HomeScreen() {
             />
           </View>
         ) : null}
+
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Monitoreo</Text>
+            <Text style={styles.cardText}>
+              Estado de salud de los microservicios.
+            </Text>
+            <PrimaryButton
+              label="Ver monitoreo"
+              onPress={() => router.push('/admin/health')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Respaldos</Text>
+            <Text style={styles.cardText}>
+              Ejecuta y revisa respaldos del sistema.
+            </Text>
+            <PrimaryButton
+              label="Ver respaldos"
+              onPress={() => router.push('/admin/backup')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
         {showAdminLive ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Resultados en vivo</Text>
