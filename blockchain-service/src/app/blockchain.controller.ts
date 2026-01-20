@@ -7,18 +7,18 @@ export class BlockchainController {
   constructor(private readonly blockchain: BlockchainService) {}
 
   @Get()
-  chain() {
+  async chain() {
     return this.blockchain.getChain();
   }
 
   @Get('verify')
-  verify() {
+  async verify() {
     return this.blockchain.verify();
   }
 
   @Post('add')
-  add(@Body() body: VoteCastEvent) {
-    const block = this.blockchain.addBlock(body);
+  async add(@Body() body: VoteCastEvent) {
+    const block = await this.blockchain.addBlock(body);
     return { ok: true, block };
   }
 }
