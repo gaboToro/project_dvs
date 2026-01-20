@@ -9,6 +9,7 @@ const ELECTION = process.env.ELECTION_SERVICE_URL ?? 'http://localhost:3006';
 const AUDIT = process.env.AUDIT_LOG_SERVICE_URL ?? 'http://localhost:3007';
 const DASHBOARD = process.env.DASHBOARD_SERVICE_URL ?? 'http://localhost:3008';
 const EMAIL = process.env.EMAIL_NOTIFIER_SERVICE_URL ?? 'http://localhost:3009';
+const RATE_LIMITER = process.env.RATE_LIMITER_URL ?? 'http://localhost:3010';
 const BACKUP = process.env.SCHEDULER_BACKUP_SERVICE_URL ?? 'http://localhost:3011';
 const REPORTING = process.env.REPORTING_SERVICE_URL ?? 'http://localhost:3012';
 
@@ -46,6 +47,12 @@ export const emailProxy = createProxyMiddleware({
   target: EMAIL,
   changeOrigin: true,
   pathRewrite: (path) => `/api/email${path}`,
+});
+
+export const rateLimitProxy = createProxyMiddleware({
+  target: RATE_LIMITER,
+  changeOrigin: true,
+  pathRewrite: (path) => `/api/ratelimit${path}`,
 });
 
 export const reportingProxy = createProxyMiddleware({
