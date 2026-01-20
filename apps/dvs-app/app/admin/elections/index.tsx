@@ -94,7 +94,7 @@ export default function ElectionsAdminScreen() {
           <Text style={styles.title}>Elecciones</Text>
           <Text style={styles.subtitle}>Crea, abre o cierra procesos.</Text>
         </View>
-        <PrimaryButton label="Nueva eleccion" onPress={() => router.push('/admin/elections/new')} />
+        <PrimaryButton label="Nueva elección" onPress={() => router.push('/admin/elections/new')} />
       </View>
 
       <ScrollView
@@ -108,7 +108,7 @@ export default function ElectionsAdminScreen() {
               <Text style={styles.status}>{election.status}</Text>
             </View>
             <Text style={styles.cardText}>
-              {election.description ?? 'Sin descripcion registrada.'}
+              {election.description ?? 'Sin descripción registrada.'}
             </Text>
             <Text style={styles.cardMeta}>
               {new Date(election.startsAt).toLocaleString()} -{' '}

@@ -5,20 +5,56 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BackButton } from '@/components/BackButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { clearToken, getRole } from '@/lib/auth';
+import { apiRequest } from '@/lib/api';
+import { clearToken, decodeJwtSubject, getRole, getToken } from '@/lib/auth';
 import { theme } from '@/lib/theme';
+
+type UserProfile = {
+  fullName?: string | null;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
   const [role, setRole] = useState<'admin' | 'voter' | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
 
   useEffect(() => {
-    getRole().then((stored) => setRole(stored as 'admin' | 'voter' | null));
+    getRole().then((stored) => {
+      const nextRole = stored as 'admin' | 'voter' | null;
+      setRole(nextRole);
+      if (nextRole === 'voter') {
+        router.replace('/voter/results-live');
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadProfile = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const userId = decodeJwtSubject(token);
+        if (!userId) return;
+        const data = await apiRequest<UserProfile>(`/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!active) return;
+        setFullName(data?.fullName ?? null);
+      } catch {
+        if (active) setFullName(null);
+      }
+    };
+    loadProfile();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const showAdmin = useMemo(() => role === 'admin', [role]);
   const showVoter = useMemo(() => role === 'voter', [role]);
   const showResults = useMemo(() => role === 'voter', [role]);
+  const showAdminLive = useMemo(() => role === 'admin', [role]);
 
   const handleLogout = async () => {
     await clearToken();
@@ -29,8 +65,11 @@ export default function HomeScreen() {
     <Screen>
       <View style={styles.header}>
         <Text style={styles.title}>Panel principal</Text>
+        <Text style={styles.welcome}>
+          BIENVENID@{fullName ? ` ${fullName}` : ''}
+        </Text>
         <Text style={styles.subtitle}>
-          Selecciona el modulo que quieres utilizar en esta demo.
+          Selecciona el módulo que quieres utilizar en Digital Voting System.
         </Text>
       </View>
 
@@ -50,13 +89,26 @@ export default function HomeScreen() {
         ) : null}
         {showAdmin ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Administracion</Text>
+            <Text style={styles.cardTitle}>Administración de Elecciones</Text>
             <Text style={styles.cardText}>
               Gestiona elecciones, candidatos y estados.
             </Text>
             <PrimaryButton
-              label="Ir a admin"
+              label="Administrar"
               onPress={() => router.push('/admin/elections')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdminLive ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Resultados en vivo</Text>
+            <Text style={styles.cardText}>
+              Monitoreo del conteo en tiempo real por elección.
+            </Text>
+            <PrimaryButton
+              label="Ver en vivo"
+              onPress={() => router.push('/admin/results-live')}
               variant="soft"
             />
           </View>
@@ -65,7 +117,7 @@ export default function HomeScreen() {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Resultados</Text>
             <Text style={styles.cardText}>
-              Consulta el cierre de cada eleccion.
+              Consulta el cierre de cada elección.
             </Text>
             <PrimaryButton
               label="Ver resultados"
@@ -77,7 +129,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label="Cerrar sesion" onPress={handleLogout} variant="ghost" />
+        <PrimaryButton label="Cerrar sesión" onPress={handleLogout} variant="ghost" />
       </View>
     </Screen>
   );
@@ -92,6 +144,13 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.heading,
     color: theme.colors.ink,
     fontSize: 26,
+  },
+  welcome: {
+    fontFamily: theme.fonts.subheading,
+    color: theme.colors.accentDark,
+    fontSize: 14,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   subtitle: {
     fontFamily: theme.fonts.body,

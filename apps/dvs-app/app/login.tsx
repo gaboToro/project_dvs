@@ -74,8 +74,8 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Admin: admin / admin123</Text>
-        <Text style={styles.footerText}>Votante: voter / voter123</Text>
+        <Text style={styles.footerText}>Admin: admin / admin</Text>
+        <Text style={styles.footerText}>Votante: voter1 / voter1</Text>
       </View>
     </Screen>
   );

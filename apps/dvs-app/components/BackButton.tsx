@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 
 import { theme } from '@/lib/theme';
 
 type BackButtonProps = {
   label?: string;
-  fallbackHref?: string;
+  fallbackHref?: Href;
   onPress?: () => void;
 };
 
