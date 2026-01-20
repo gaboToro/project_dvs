@@ -24,34 +24,43 @@ export async function getRole() {
   return AsyncStorage.getItem(ROLE_KEY);
 }
 
-export function decodeJwtRole(token: string): 'admin' | 'voter' | null {
+function decodeJwtPayload(token: string): Record<string, any> | null {
   const parts = token.split('.');
   if (parts.length < 2 || typeof atob !== 'function') return null;
   const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
   try {
-    const payload = JSON.parse(atob(padded));
-    const roles = payload?.roles ?? [];
-    if (Array.isArray(roles)) {
-      if (roles.includes('admin')) return 'admin';
-      if (roles.includes('voter')) return 'voter';
-    }
-    return null;
+    return JSON.parse(atob(padded)) as Record<string, any>;
   } catch {
     return null;
   }
 }
 
-export function decodeJwtSubject(token: string): string | null {
-  const parts = token.split('.');
-  if (parts.length < 2 || typeof atob !== 'function') return null;
-  const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-  try {
-    const payload = JSON.parse(atob(padded));
-    const sub = payload?.sub;
-    return typeof sub === 'string' && sub ? sub : null;
-  } catch {
-    return null;
+export function decodeJwtRole(token: string): 'admin' | 'voter' | null {
+  const payload = decodeJwtPayload(token);
+  const roles = payload?.roles ?? [];
+  if (Array.isArray(roles)) {
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('voter')) return 'voter';
   }
+  return null;
+}
+
+export function decodeJwtSubject(token: string): string | null {
+  const payload = decodeJwtPayload(token);
+  const sub = payload?.sub;
+  return typeof sub === 'string' && sub ? sub : null;
+}
+
+export function decodeJwtExpiry(token: string): number | null {
+  const payload = decodeJwtPayload(token);
+  const exp = payload?.exp;
+  return typeof exp === 'number' ? exp : null;
+}
+
+export function isTokenExpired(token: string, skewSeconds = 10): boolean {
+  const exp = decodeJwtExpiry(token);
+  if (!exp) return true;
+  const now = Math.floor(Date.now() / 1000);
+  return now >= exp - skewSeconds;
 }

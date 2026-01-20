@@ -32,10 +32,13 @@ export class AuthController {
       );
 
       const user = res.data as { id: string; role: string };
-      const accessToken = await this.jwtService.signAsync({
-        sub: user.id,
-        roles: [user.role],
-      });
+      const accessToken = await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          roles: [user.role],
+        },
+        { expiresIn: '5m' },
+      );
 
       void this.audit('LOGIN_SUCCESS', user.id, user.role, {
         username: body.username,
