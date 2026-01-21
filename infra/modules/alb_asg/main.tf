@@ -5,6 +5,22 @@ variable "public_subnet_ids"  { type = list(string) }
 variable "private_subnet_ids" { type = list(string) }
 variable "key_name"    { type = string }
 variable "bastion_sg_id"{ type = string }
+variable "user_data" {
+  type    = string
+  default = ""
+}
+
+locals {
+  default_user_data = <<-EOF
+    #!/bin/bash
+    dnf update -y
+    dnf install -y docker docker-compose-plugin
+    systemctl enable docker
+    systemctl start docker
+    usermod -aG docker ec2-user
+  EOF
+  effective_user_data = var.user_data != "" ? var.user_data : local.default_user_data
+}
 
 data "aws_ami" "al2023" {
   most_recent = true
@@ -98,16 +114,8 @@ resource "aws_launch_template" "lt" {
 
   vpc_security_group_ids = [aws_security_group.app.id]
 
-  # SOLO prepara el host (instala docker), NO corre contenedores
-  user_data = base64encode(<<-EOF
-    #!/bin/bash
-    dnf update -y
-    dnf install -y docker
-    systemctl enable docker
-    systemctl start docker
-    usermod -aG docker ec2-user
-  EOF
-  )
+  # Prepara el host y, si se define, ejecuta user_data personalizado.
+  user_data = base64encode(local.effective_user_data)
 }
 
 resource "aws_autoscaling_group" "asg" {
