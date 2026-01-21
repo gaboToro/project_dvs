@@ -1,0 +1,12 @@
+{
+  "name": "dvs-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "dev": "electron ."
+  },
+  "dependencies": {
+    "electron": "^36.3.2"
+  }
+}

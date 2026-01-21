@@ -7,9 +7,10 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/contracts",
+        "outputPath": "libs/contracts/dist",
         "main": "libs/contracts/src/index.ts",
-        "tsConfig": "libs/contracts/tsconfig.lib.json"
+        "tsConfig": "libs/contracts/tsconfig.lib.json",
+        "generatePackageJson": false
       }
     }
   }
