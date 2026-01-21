@@ -1,6 +1,6 @@
 services:
   election-service:
-    image: ghcr.io/gaboToro/election-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/election-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/business.env
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   voting-service:
-    image: ghcr.io/gaboToro/voting-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/voting-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/business.env
@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   results-service:
-    image: ghcr.io/gaboToro/results-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/results-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/business.env
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   blockchain-service:
-    image: ghcr.io/gaboToro/blockchain-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/blockchain-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/business.env
@@ -44,7 +44,7 @@ services:
     restart: unless-stopped
 
   reporting-service:
-    image: ghcr.io/gaboToro/reporting-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/reporting-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/business.env

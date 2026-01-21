@@ -1,6 +1,6 @@
 services:
   audit-log-service:
-    image: ghcr.io/gaboToro/audit-log-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/audit-log-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/trust.env
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   dashboard-service:
-    image: ghcr.io/gaboToro/dashboard-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/dashboard-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/trust.env

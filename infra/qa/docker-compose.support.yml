@@ -1,6 +1,6 @@
 services:
   email-notifier-service:
-    image: ghcr.io/gaboToro/email-notifier-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/email-notifier-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/support.env
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   scheduler-backup-service:
-    image: ghcr.io/gaboToro/scheduler-backup-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/scheduler-backup-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/support.env

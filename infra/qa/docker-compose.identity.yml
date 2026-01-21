@@ -1,6 +1,6 @@
 services:
   api-gateway:
-    image: ghcr.io/gaboToro/api-gateway:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/api-gateway:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
       - ./env/identity.env
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   auth-service:
-    image: ghcr.io/gaboToro/auth-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/auth-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
     environment:
@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
 
   user-service:
-    image: ghcr.io/gaboToro/user-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/user-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
     environment:
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
 
   rate-limiter-service:
-    image: ghcr.io/gaboToro/rate-limiter-service:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/rate-limiter-service:${IMAGE_TAG:-qa}
     env_file:
       - ./env/common.env
     environment:
