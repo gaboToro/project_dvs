@@ -104,30 +104,30 @@ jobs:
       - name: Set matrix
         id: set-matrix
         run: |
-          $services = @()
-          if ("${{ steps.filter.outputs.api-gateway }}" -eq "true") { $services += "api-gateway" }
-          if ("${{ steps.filter.outputs.auth-service }}" -eq "true") { $services += "auth-service" }
-          if ("${{ steps.filter.outputs.user-service }}" -eq "true") { $services += "user-service" }
-          if ("${{ steps.filter.outputs.rate-limiter-service }}" -eq "true") { $services += "rate-limiter-service" }
-          if ("${{ steps.filter.outputs.election-service }}" -eq "true") { $services += "election-service" }
-          if ("${{ steps.filter.outputs.voting-service }}" -eq "true") { $services += "voting-service" }
-          if ("${{ steps.filter.outputs.results-service }}" -eq "true") { $services += "results-service" }
-          if ("${{ steps.filter.outputs.blockchain-service }}" -eq "true") { $services += "blockchain-service" }
-          if ("${{ steps.filter.outputs.reporting-service }}" -eq "true") { $services += "reporting-service" }
-          if ("${{ steps.filter.outputs.audit-log-service }}" -eq "true") { $services += "audit-log-service" }
-          if ("${{ steps.filter.outputs.dashboard-service }}" -eq "true") { $services += "dashboard-service" }
-          if ("${{ steps.filter.outputs.email-notifier-service }}" -eq "true") { $services += "email-notifier-service" }
-          if ("${{ steps.filter.outputs.scheduler-backup-service }}" -eq "true") { $services += "scheduler-backup-service" }
-          if ("${{ steps.filter.outputs.frontend }}" -eq "true") { $services += "frontend" }
+          services=()
+          [[ "${{ steps.filter.outputs.api-gateway }}" == "true" ]] && services+=("api-gateway")
+          [[ "${{ steps.filter.outputs.auth-service }}" == "true" ]] && services+=("auth-service")
+          [[ "${{ steps.filter.outputs.user-service }}" == "true" ]] && services+=("user-service")
+          [[ "${{ steps.filter.outputs.rate-limiter-service }}" == "true" ]] && services+=("rate-limiter-service")
+          [[ "${{ steps.filter.outputs.election-service }}" == "true" ]] && services+=("election-service")
+          [[ "${{ steps.filter.outputs.voting-service }}" == "true" ]] && services+=("voting-service")
+          [[ "${{ steps.filter.outputs.results-service }}" == "true" ]] && services+=("results-service")
+          [[ "${{ steps.filter.outputs.blockchain-service }}" == "true" ]] && services+=("blockchain-service")
+          [[ "${{ steps.filter.outputs.reporting-service }}" == "true" ]] && services+=("reporting-service")
+          [[ "${{ steps.filter.outputs.audit-log-service }}" == "true" ]] && services+=("audit-log-service")
+          [[ "${{ steps.filter.outputs.dashboard-service }}" == "true" ]] && services+=("dashboard-service")
+          [[ "${{ steps.filter.outputs.email-notifier-service }}" == "true" ]] && services+=("email-notifier-service")
+          [[ "${{ steps.filter.outputs.scheduler-backup-service }}" == "true" ]] && services+=("scheduler-backup-service")
+          [[ "${{ steps.filter.outputs.frontend }}" == "true" ]] && services+=("frontend")
 
-          if ($services.Count -eq 0) {
-            $matrix = '{\"include\":[]}'
-          } else {
-            $items = $services | ForEach-Object { "{\"image\":\"$_\"}" }
-            $matrix = '{\"include\":[' + ($items -join ",") + ']}'
-          }
-          echo "matrix=$matrix" >> $env:GITHUB_OUTPUT
-        shell: pwsh
+          if [ ${#services[@]} -eq 0 ]; then
+            echo "matrix={\"include\":[]}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          matrix=$(printf '%s\n' "${services[@]}" | jq -R . | jq -s '{include: map({image: .})}')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+        shell: bash
 
   build-and-push:
     needs: detect-changes
