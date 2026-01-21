@@ -125,7 +125,7 @@ jobs:
             exit 0
           fi
 
-          matrix=$(printf '%s\n' "${services[@]}" | jq -R . | jq -s '{include: map({image: .})}')
+          matrix=$(printf '%s\n' "${services[@]}" | jq -R . | jq -c -s '{include: map({image: .})}')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
         shell: bash
 
