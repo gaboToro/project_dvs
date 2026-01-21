@@ -53,6 +53,15 @@ resource "aws_instance" "bastion" {
   tags = { Name = "${var.project}-${var.environment}-bastion" }
 }
 
-output "bastion_public_ip" { value = aws_instance.bastion.public_ip }
+resource "aws_eip" "bastion" {
+  domain = "vpc"
+}
+
+resource "aws_eip_association" "bastion" {
+  instance_id   = aws_instance.bastion.id
+  allocation_id = aws_eip.bastion.id
+}
+
+output "bastion_public_ip" { value = aws_eip.bastion.public_ip }
 output "bastion_sg_id"      { value = aws_security_group.bastion.id }
 output "key_name"           { value = aws_key_pair.this.key_name }

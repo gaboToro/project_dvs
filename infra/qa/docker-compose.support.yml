@@ -1,0 +1,22 @@
+services:
+  email-notifier-service:
+    image: ghcr.io/gaboToro/email-notifier-service:${IMAGE_TAG:-qa}
+    env_file:
+      - ./env/common.env
+      - ./env/support.env
+    environment:
+      PORT: "3009"
+    ports:
+      - "3009:3009"
+    restart: unless-stopped
+
+  scheduler-backup-service:
+    image: ghcr.io/gaboToro/scheduler-backup-service:${IMAGE_TAG:-qa}
+    env_file:
+      - ./env/common.env
+      - ./env/support.env
+    environment:
+      PORT: "3011"
+    ports:
+      - "3011:3011"
+    restart: unless-stopped

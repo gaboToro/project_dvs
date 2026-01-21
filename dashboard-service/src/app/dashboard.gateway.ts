@@ -9,7 +9,10 @@ type SubscribePayload = {
 @WebSocketGateway({
   namespace: '/dashboard',
   cors: {
-    origin: ['http://localhost:8081', 'http://localhost:19006', 'http://localhost:3000'],
+    origin: (process.env.CORS_ORIGINS || 'http://localhost:8081,http://localhost:19006,http://localhost:3000')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
   },
 })
 export class DashboardGateway {

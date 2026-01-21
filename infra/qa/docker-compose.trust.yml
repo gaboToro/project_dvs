@@ -1,0 +1,22 @@
+services:
+  audit-log-service:
+    image: ghcr.io/gaboToro/audit-log-service:${IMAGE_TAG:-qa}
+    env_file:
+      - ./env/common.env
+      - ./env/trust.env
+    environment:
+      PORT: "3007"
+    ports:
+      - "3007:3007"
+    restart: unless-stopped
+
+  dashboard-service:
+    image: ghcr.io/gaboToro/dashboard-service:${IMAGE_TAG:-qa}
+    env_file:
+      - ./env/common.env
+      - ./env/trust.env
+    environment:
+      PORT: "3008"
+    ports:
+      - "3008:3008"
+    restart: unless-stopped

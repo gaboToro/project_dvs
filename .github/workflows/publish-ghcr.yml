@@ -1,0 +1,112 @@
+name: Publish GHCR
+
+on:
+  push:
+    branches: [qa, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: api-gateway
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/api-gateway
+              SERVICE_DIR=api-gateway
+          - image: auth-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/auth-service
+              SERVICE_DIR=auth-service
+          - image: user-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/user-service
+              SERVICE_DIR=user-service
+          - image: rate-limiter-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/rate-limiter-service
+              SERVICE_DIR=rate-limiter-service
+          - image: election-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/election-service
+              SERVICE_DIR=election-service
+          - image: voting-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/voting-service
+              SERVICE_DIR=voting-service
+          - image: results-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/results-service
+              SERVICE_DIR=results-service
+          - image: blockchain-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/blockchain-service
+              SERVICE_DIR=blockchain-service
+          - image: reporting-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/reporting-service
+              SERVICE_DIR=reporting-service
+          - image: audit-log-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/audit-log-service
+              SERVICE_DIR=audit-log-service
+          - image: dashboard-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/dashboard-service
+              SERVICE_DIR=dashboard-service
+          - image: email-notifier-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/email-notifier-service
+              SERVICE_DIR=email-notifier-service
+          - image: scheduler-backup-service
+            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            build_args: |
+              SERVICE_NAME=@org/scheduler-backup-service
+              SERVICE_DIR=scheduler-backup-service
+          - image: frontend
+            dockerfile: infra/qa/docker/Dockerfile.frontend
+            build_args: |
+              EXPO_PUBLIC_API_BASE_URL=${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          build-args: ${{ matrix.build_args }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ github.sha }}
