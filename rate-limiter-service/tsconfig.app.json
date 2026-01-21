@@ -11,9 +11,5 @@
   },
   "include": ["src/**/*.ts", "../libs/contracts/src/**/*.ts"],
   "exclude": [],
-  "references": [
-    {
-      "path": "../libs/contracts/tsconfig.lib.json"
-    }
-  ]
+  "references": []
 }
