@@ -1,4 +1,5 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -7,7 +8,7 @@ export class DashboardController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'dashboard-service' };
+    return createHealthPayload('dashboard-service');
   }
 
   @Get(':electionId')
@@ -17,3 +18,5 @@ export class DashboardController {
     return doc;
   }
 }
+
+

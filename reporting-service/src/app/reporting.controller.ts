@@ -1,4 +1,5 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import type { Response } from 'express';
 import type { ElectionStatus } from '@org/contracts';
 import { ReportingService } from './reporting.service';
@@ -9,7 +10,7 @@ export class ReportingController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'reporting-service' };
+    return createHealthPayload('reporting-service');
   }
 
   @Get('elections.csv')
@@ -20,3 +21,5 @@ export class ReportingController {
     res.send(csv);
   }
 }
+
+

@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, UnauthorizedException, ForbiddenException, Query } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { JwtService } from '@nestjs/jwt';
 import type { CreateCandidateRequestDto, CreateElectionRequestDto, UpdateElectionRequestDto, ElectionStatus } from '@org/contracts';
 import { ElectionService } from './election.service';
@@ -33,7 +34,7 @@ export class ElectionController {
   @Get('health')
   async health() {
     await this.service.ping();
-    return { status: 'ok', service: 'election-service' };
+    return createHealthPayload('election-service');
   }
 
   @Get()
@@ -198,3 +199,5 @@ export class ElectionController {
     }
   }
 }
+
+

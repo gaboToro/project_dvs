@@ -1,4 +1,5 @@
 import { Body, Controller, ForbiddenException, Get, Headers, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import type { CreateUserRequestDto, LoginRequestDto, UpdateUserRequestDto } from '@org/contracts';
 import { JwtAuthGuard, requireAdminOrSelf } from './authz';
 import { UsersService } from './user.service';
@@ -9,7 +10,7 @@ export class UsersController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'user-service' };
+    return createHealthPayload('user-service');
   }
 
   // Admin-only list (no admin => only self)
@@ -78,3 +79,5 @@ export class UsersController {
     return this.users.validateCredentials(body.username, body.password);
   }
 }
+
+

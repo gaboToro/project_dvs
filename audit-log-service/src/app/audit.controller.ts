@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Headers, Post, Query, UnauthorizedException, ValidationPipe } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import type { AuditLogDto, AuditLogQuery, CreateAuditLogRequestDto } from '@org/contracts';
 import { AuditService } from './audit.service';
 
@@ -8,7 +9,7 @@ export class AuditController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'audit-log-service' };
+    return createHealthPayload('audit-log-service');
   }
 
   @Post('log')
@@ -36,3 +37,5 @@ export class AuditController {
     return this.audit.list(query);
   }
 }
+
+

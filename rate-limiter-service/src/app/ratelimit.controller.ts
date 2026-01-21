@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { RateLimitService } from './ratelimit.service';
 
 type CheckRequest = {
@@ -13,7 +14,7 @@ export class RateLimitController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'rate-limiter-service' };
+    return createHealthPayload('rate-limiter-service');
   }
 
   @Post('check')
@@ -33,3 +34,5 @@ export class RateLimitController {
     return this.limiter.check(key, limit, windowSec);
   }
 }
+
+

@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 
 @Injectable()
 export class AppService {
   health() {
-    return { status: 'ok', service: 'voting-service' };
+    return createHealthPayload('voting-service');
   }
 }
+
+

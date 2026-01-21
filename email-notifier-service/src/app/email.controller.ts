@@ -1,4 +1,5 @@
 import { Body, Controller, Headers, Post, Get, UnauthorizedException } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import type { EmailMessage } from './email.types';
 import { EmailQueue } from './email.queue';
 
@@ -8,7 +9,7 @@ export class EmailController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'email-notifier-service' };
+    return createHealthPayload('email-notifier-service');
   }
 
   @Post('send')
@@ -29,3 +30,5 @@ export class EmailController {
     return { ok: true };
   }
 }
+
+

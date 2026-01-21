@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import type { LoginRequestDto, LoginResponseDto } from '@org/contracts';
@@ -13,7 +14,7 @@ export class AuthController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'auth-service' };
+    return createHealthPayload('auth-service');
   }
 
   @Post('login')
@@ -89,3 +90,5 @@ export class AuthController {
     }
   }
 }
+
+
