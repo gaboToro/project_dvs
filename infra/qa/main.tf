@@ -94,7 +94,7 @@ locals {
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       api-gateway:
-        image: ghcr.io/gaboToro/api-gateway:qa
+        image: ghcr.io/gabotoro/api-gateway:qa
         env_file:
           - /opt/dvs/common.env
           - /opt/dvs/identity.env
@@ -105,7 +105,7 @@ locals {
         restart: unless-stopped
 
       auth-service:
-        image: ghcr.io/gaboToro/auth-service:qa
+        image: ghcr.io/gabotoro/auth-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -115,7 +115,7 @@ locals {
         restart: unless-stopped
 
       user-service:
-        image: ghcr.io/gaboToro/user-service:qa
+        image: ghcr.io/gabotoro/user-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -125,7 +125,7 @@ locals {
         restart: unless-stopped
 
       rate-limiter-service:
-        image: ghcr.io/gaboToro/rate-limiter-service:qa
+        image: ghcr.io/gabotoro/rate-limiter-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -154,7 +154,7 @@ locals {
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       election-service:
-        image: ghcr.io/gaboToro/election-service:qa
+        image: ghcr.io/gabotoro/election-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -164,7 +164,7 @@ locals {
         restart: unless-stopped
 
       voting-service:
-        image: ghcr.io/gaboToro/voting-service:qa
+        image: ghcr.io/gabotoro/voting-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -174,7 +174,7 @@ locals {
         restart: unless-stopped
 
       results-service:
-        image: ghcr.io/gaboToro/results-service:qa
+        image: ghcr.io/gabotoro/results-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -184,7 +184,7 @@ locals {
         restart: unless-stopped
 
       blockchain-service:
-        image: ghcr.io/gaboToro/blockchain-service:qa
+        image: ghcr.io/gabotoro/blockchain-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -194,7 +194,7 @@ locals {
         restart: unless-stopped
 
       reporting-service:
-        image: ghcr.io/gaboToro/reporting-service:qa
+        image: ghcr.io/gabotoro/reporting-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -223,7 +223,7 @@ locals {
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       audit-log-service:
-        image: ghcr.io/gaboToro/audit-log-service:qa
+        image: ghcr.io/gabotoro/audit-log-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -233,7 +233,7 @@ locals {
         restart: unless-stopped
 
       dashboard-service:
-        image: ghcr.io/gaboToro/dashboard-service:qa
+        image: ghcr.io/gabotoro/dashboard-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -262,7 +262,7 @@ locals {
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       email-notifier-service:
-        image: ghcr.io/gaboToro/email-notifier-service:qa
+        image: ghcr.io/gabotoro/email-notifier-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -272,7 +272,7 @@ locals {
         restart: unless-stopped
 
       scheduler-backup-service:
-        image: ghcr.io/gaboToro/scheduler-backup-service:qa
+        image: ghcr.io/gabotoro/scheduler-backup-service:qa
         env_file:
           - /opt/dvs/common.env
         environment:
@@ -405,7 +405,7 @@ locals {
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       frontend:
-        image: ghcr.io/gaboToro/frontend:qa
+        image: ghcr.io/gabotoro/frontend:qa
         container_name: dvs-frontend
         restart: unless-stopped
         ports:

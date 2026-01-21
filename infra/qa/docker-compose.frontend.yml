@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/gaboToro/frontend:${IMAGE_TAG:-qa}
+    image: ghcr.io/gabotoro/frontend:${IMAGE_TAG:-qa}
     container_name: dvs-frontend
     restart: unless-stopped
     ports:
