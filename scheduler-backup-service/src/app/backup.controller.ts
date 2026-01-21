@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@nestjs/common';
-import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
+import { createHealthPayload } from '@org/contracts';
 import { BackupService } from './backup.service';
 
 @Controller('backup')
@@ -28,4 +28,5 @@ export class BackupController {
     return this.backups.runBackup(body.reason ?? 'manual');
   }
 }
+
 

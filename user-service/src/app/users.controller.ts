@@ -1,5 +1,5 @@
 import { Body, Controller, ForbiddenException, Get, Headers, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
-import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
+import { createHealthPayload } from '@org/contracts';
 import type { CreateUserRequestDto, LoginRequestDto, UpdateUserRequestDto } from '@org/contracts';
 import { JwtAuthGuard, requireAdminOrSelf } from './authz';
 import { UsersService } from './user.service';
@@ -79,4 +79,5 @@ export class UsersController {
     return this.users.validateCredentials(body.username, body.password);
   }
 }
+
 

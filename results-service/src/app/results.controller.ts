@@ -1,5 +1,5 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
-import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
+import { createHealthPayload } from '@org/contracts';
 import { getMongoDb } from './db/mongo';
 
 @Controller('results')
@@ -27,4 +27,5 @@ export class ResultsController {
     };
   }
 }
+
 

@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
-import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
+import { createHealthPayload } from '@org/contracts';
 import type { Response } from 'express';
 import type { ElectionStatus } from '@org/contracts';
 import { ReportingService } from './reporting.service';
@@ -21,4 +21,5 @@ export class ReportingController {
     res.send(csv);
   }
 }
+
 

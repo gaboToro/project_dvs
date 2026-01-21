@@ -1,5 +1,5 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
-import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
+import { createHealthPayload } from '@org/contracts';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -18,4 +18,5 @@ export class DashboardController {
     return doc;
   }
 }
+
 
