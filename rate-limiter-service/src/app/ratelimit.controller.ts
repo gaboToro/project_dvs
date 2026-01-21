@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
-import { createHealthPayload } from '@org/contracts';
+import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
 import { RateLimitService } from './ratelimit.service';
 
 type CheckRequest = {
@@ -34,3 +34,4 @@ export class RateLimitController {
     return this.limiter.check(key, limit, windowSec);
   }
 }
+

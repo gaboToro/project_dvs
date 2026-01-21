@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createHealthPayload } from '@org/contracts';
+import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
 
 @Injectable()
 export class AppService {
@@ -7,3 +7,4 @@ export class AppService {
     return createHealthPayload('voting-service');
   }
 }
+

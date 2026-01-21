@@ -1,5 +1,5 @@
 import { Body, Controller, Headers, Post, Get, UnauthorizedException } from '@nestjs/common';
-import { createHealthPayload } from '@org/contracts';
+import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
 import type { EmailMessage } from './email.types';
 import { EmailQueue } from './email.queue';
 
@@ -30,3 +30,4 @@ export class EmailController {
     return { ok: true };
   }
 }
+

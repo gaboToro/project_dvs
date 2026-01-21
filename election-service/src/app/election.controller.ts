@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, UnauthorizedException, ForbiddenException, Query } from '@nestjs/common';
-import { createHealthPayload } from '@org/contracts';
+import { createHealthPayload } from '../../../libs/contracts/src/lib/health';
 import { JwtService } from '@nestjs/jwt';
 import type { CreateCandidateRequestDto, CreateElectionRequestDto, UpdateElectionRequestDto, ElectionStatus } from '@org/contracts';
 import { ElectionService } from './election.service';
@@ -199,3 +199,4 @@ export class ElectionController {
     }
   }
 }
+
