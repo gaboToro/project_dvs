@@ -78,6 +78,18 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  nginx:
+    image: nginx:alpine
+    container_name: dvs-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./apps/dvs-app/dist:/usr/share/nginx/html:ro
+      - ./infra/local/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
 volumes:
   dvs_pg:
   dvs_mongo:
