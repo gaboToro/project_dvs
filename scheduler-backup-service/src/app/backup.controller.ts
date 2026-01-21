@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { BackupService } from './backup.service';
 
 @Controller('backup')
@@ -7,7 +8,7 @@ export class BackupController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'scheduler-backup-service' };
+    return createHealthPayload('scheduler-backup-service');
   }
 
   @Get('last')
