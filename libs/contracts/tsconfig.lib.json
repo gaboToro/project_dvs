@@ -7,13 +7,13 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "composite": true,
     "declaration": true,
+    "emitDeclarationOnly": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["index.ts", "src/**/*.ts"],
   "references": [],
   "exclude": [
     "jest.config.ts",

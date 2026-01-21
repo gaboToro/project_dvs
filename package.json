@@ -6,7 +6,9 @@
     "lint:all": "nx run-many -t lint --all",
     "test:all": "nx run-many -t test --all",
     "build:all": "nx run-many -t build --all",
-    "load:smoke": "node tools/load/basic-load.js http://localhost:3000/api/auth/health"
+    "load:smoke": "node tools/load/basic-load.js http://localhost:3000/api/auth/health",
+    "desktop:dev": "npm --prefix apps/dvs-desktop run dev",
+    "desktop:build": "npm --prefix apps/dvs-app run export:web"
   },
   "private": true,
   "devDependencies": {
@@ -49,6 +51,7 @@
   "workspaces": [
     "packages/*",
     "apps/*",
+    "apps/dvs-desktop",
     "api-gateway",
     "api-gateway-e2e",
     "libs",
