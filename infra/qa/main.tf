@@ -669,6 +669,50 @@ resource "aws_lb_target_group" "api" {
   }
 }
 
+resource "aws_lb_target_group" "frontend" {
+  name        = "${var.project_name}-${var.environment}-frontend-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "instance"
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = "80"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 15
+    timeout             = 5
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-frontend-tg"
+  }
+}
+
+resource "aws_lb_target_group" "dashboard" {
+  name        = "${var.project_name}-${var.environment}-dashboard-tg"
+  port        = 3008
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "instance"
+
+  health_check {
+    path                = "/api/dashboard/health"
+    protocol            = "HTTP"
+    port                = "3008"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 15
+    timeout             = 5
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-dashboard-tg"
+  }
+}
+
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.qa.arn
   port              = 80
@@ -676,7 +720,39 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend.arn
+  }
+}
+
+resource "aws_lb_listener_rule" "api_paths" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
     target_group_arn = aws_lb_target_group.api.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "dashboard_paths" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 20
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.dashboard.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/dashboard/*"]
+    }
   }
 }
 
@@ -684,4 +760,16 @@ resource "aws_lb_target_group_attachment" "identity_api" {
   target_group_arn = aws_lb_target_group.api.arn
   target_id        = aws_instance.identity.id
   port             = 3000
+}
+
+resource "aws_lb_target_group_attachment" "identity_frontend" {
+  target_group_arn = aws_lb_target_group.frontend.arn
+  target_id        = aws_instance.identity.id
+  port             = 80
+}
+
+resource "aws_lb_target_group_attachment" "trust_support_dashboard" {
+  target_group_arn = aws_lb_target_group.dashboard.arn
+  target_id        = aws_instance.trust_support.id
+  port             = 3008
 }
