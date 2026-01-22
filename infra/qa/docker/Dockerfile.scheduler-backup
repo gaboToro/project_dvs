@@ -1,0 +1,23 @@
+ARG NODE_VERSION=20.20.0
+
+FROM node:${NODE_VERSION}-bullseye-slim
+WORKDIR /repo
+
+ARG SERVICE_NAME
+ARG SERVICE_DIR
+
+COPY package.json package-lock.json nx.json tsconfig.base.json tsconfig.json ./
+COPY . .
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends postgresql-client mongodb-database-tools \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN npm ci
+RUN npx nx run @org/contracts:build
+RUN npx nx run ${SERVICE_NAME}:build
+
+ENV NODE_ENV=production
+ENV SERVICE_DIR=${SERVICE_DIR}
+
+CMD ["sh", "-c", "node ${SERVICE_DIR}/dist/main.js"]
