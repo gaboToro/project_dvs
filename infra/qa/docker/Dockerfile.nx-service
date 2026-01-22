@@ -3,6 +3,9 @@ ARG NODE_VERSION=20.20.0
 FROM node:${NODE_VERSION}-bullseye-slim AS build
 WORKDIR /repo
 
+ARG SERVICE_NAME
+ARG SERVICE_DIR
+
 COPY package.json package-lock.json nx.json tsconfig.base.json tsconfig.json ./
 COPY . .
 
@@ -15,6 +18,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NODE_PATH=/app/workspace_modules
+
+ARG SERVICE_DIR
 
 COPY --from=build /repo/${SERVICE_DIR}/dist ./dist
 COPY --from=build /repo/${SERVICE_DIR}/dist/package.json ./package.json
