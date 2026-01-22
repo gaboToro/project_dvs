@@ -77,7 +77,7 @@ jobs:
               SERVICE_NAME=@org/email-notifier-service
               SERVICE_DIR=email-notifier-service
           - image: scheduler-backup-service
-            dockerfile: infra/qa/docker/Dockerfile.nx-service
+            dockerfile: infra/qa/docker/Dockerfile.scheduler-backup
             build_args: |
               SERVICE_NAME=@org/scheduler-backup-service
               SERVICE_DIR=scheduler-backup-service
