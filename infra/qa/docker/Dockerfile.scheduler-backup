@@ -12,8 +12,9 @@ COPY . .
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
   && mkdir -p /etc/apt/keyrings \
-  && curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg --dearmor -o /etc/apt/keyrings/mongodb.asc \
-  && echo "deb [signed-by=/etc/apt/keyrings/mongodb.asc] https://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 main" \
+  && curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg --dearmor -o /etc/apt/keyrings/mongodb.gpg \
+  && chmod 644 /etc/apt/keyrings/mongodb.gpg \
+  && echo "deb [signed-by=/etc/apt/keyrings/mongodb.gpg] https://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 main" \
     > /etc/apt/sources.list.d/mongodb-org-7.0.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends postgresql-client mongodb-database-tools \
