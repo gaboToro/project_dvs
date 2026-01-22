@@ -1,6 +1,6 @@
 ARG NODE_VERSION=20.20.0
 
-FROM node:${NODE_VERSION}-bullseye-slim AS build
+FROM node:${NODE_VERSION}-bullseye-slim
 WORKDIR /repo
 
 ARG SERVICE_NAME
@@ -10,22 +10,9 @@ COPY package.json package-lock.json nx.json tsconfig.base.json tsconfig.json ./
 COPY . .
 
 RUN npm ci
-RUN npx nx run ${SERVICE_NAME}:build
-RUN npx nx run ${SERVICE_NAME}:prune
-
-FROM node:${NODE_VERSION}-bullseye-slim
-WORKDIR /app
+RUN npx nx run ${SERVICE_NAME}:build --with-deps
 
 ENV NODE_ENV=production
-ENV NODE_PATH=/app/workspace_modules
+ENV SERVICE_DIR=${SERVICE_DIR}
 
-ARG SERVICE_DIR
-
-COPY --from=build /repo/${SERVICE_DIR}/dist ./dist
-COPY --from=build /repo/${SERVICE_DIR}/dist/package.json ./package.json
-COPY --from=build /repo/${SERVICE_DIR}/dist/package-lock.json ./package-lock.json
-COPY --from=build /repo/${SERVICE_DIR}/dist/workspace_modules ./workspace_modules
-
-RUN npm ci --omit=dev
-
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "node ${SERVICE_DIR}/dist/main.js"]
