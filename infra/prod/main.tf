@@ -102,10 +102,17 @@ locals {
     SCHEDULER_BACKUP_SERVICE_URL=http://${var.trust_support_private_ip}:3011
   ENV
 
+  site24x7_install = <<-EOF
+    curl -fsSL -o /tmp/site24x7-agent.sh https://staticdownloads.site24x7.com/server/Site24x7FullStackAgent_LinuxIns.sh
+    bash /tmp/site24x7-agent.sh -i -key=${var.site24x7_key} -automation=true -apm_insight=false || true
+    rm -f /tmp/site24x7-agent.sh
+  EOF
+
   user_data_core = <<-EOF
     #!/bin/bash
     set -e
     dnf update -y
+    ${local.site24x7_install}
     dnf install -y docker
     systemctl enable docker
     systemctl start docker
@@ -220,6 +227,7 @@ locals {
     #!/bin/bash
     set -e
     dnf update -y
+    ${local.site24x7_install}
     dnf install -y docker
     systemctl enable docker
     systemctl start docker
@@ -294,6 +302,7 @@ locals {
     #!/bin/bash
     set -e
     dnf update -y
+    ${local.site24x7_install}
     dnf install -y docker
     systemctl enable docker
     systemctl start docker
@@ -367,6 +376,7 @@ locals {
     #!/bin/bash
     set -e
     dnf update -y
+    ${local.site24x7_install}
     dnf install -y docker
     systemctl enable docker
     systemctl start docker
@@ -613,6 +623,12 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   key_name                    = aws_key_pair.main.key_name
+  user_data = <<-EOF
+    #!/bin/bash
+    set -e
+    dnf update -y
+    ${local.site24x7_install}
+  EOF
 
   tags = {
     Name = "${var.project_name}-${var.environment}-bastion"
