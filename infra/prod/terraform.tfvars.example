@@ -1,0 +1,75 @@
+aws_region      = "us-east-1"
+project_name    = "dvs"
+environment     = "prod"
+vpc_cidr        = "10.10.0.0/16"
+public_subnet_cidr = "10.10.1.0/24"
+public_subnet_cidr_b = "10.10.2.0/24"
+
+my_ip_cidr     = "YOUR_PUBLIC_IP/32"
+ssh_public_key = "ssh-ed25519 AAAA... your-key"
+
+instance_type_core     = "t3.medium"
+instance_type_services = "t3.small"
+
+core_private_ip         = "10.10.1.10"
+identity_private_ip     = "10.10.1.11"
+business_private_ip     = "10.10.1.12"
+trust_support_private_ip = "10.10.1.13"
+
+image_repo_prefix = "ghcr.io/gabotoro"
+image_tag         = "qa"
+
+cors_origins = "https://your-prod-domain.example"
+
+jwt_secret             = "super-secret-key-for-dev-only"
+internal_service_token = "dev-internal-token"
+admin_password         = "admin123"
+voter_password         = "voter123"
+voter_hash_secret      = "dev-voter-hash-secret"
+seed_default_users     = "false"
+
+supabase_url              = "https://ojgzxekngfiejuwunejx.supabase.co"
+supabase_service_role_key = "CHANGE_ME"
+supabase_pg_uri           = "CHANGE_ME"
+
+pg_user     = "dvs"
+pg_password = "dvs"
+pg_database = "dvs"
+
+dashboard_mongo_user = "dvs_user"
+dashboard_mongo_pass = "dvs_pass_123"
+dashboard_mongo_db   = "dvs_dashboard"
+
+kafka_topic_votes    = "votes.cast.v1"
+rabbitmq_queue_email = "emails.send"
+
+rate_limiter_enabled    = "true"
+rate_limiter_limit      = "60"
+rate_limiter_window_sec = "60"
+
+audit_logger_enabled    = "true"
+audit_logger_timeout_ms = "800"
+
+dashboard_consumer_enabled = "true"
+email_consumer_enabled     = "true"
+
+smtp_host   = "smtp.gmail.com"
+smtp_port   = "587"
+smtp_secure = "false"
+smtp_user   = "digitalvotings@gmail.com"
+smtp_pass   = "CHANGE_ME"
+smtp_from   = "digitalvotings@gmail.com"
+
+backup_enabled           = "true"
+backup_cron              = "0 2 * * *"
+backup_dir               = "backups"
+backup_pg_enabled        = "true"
+backup_mongo_enabled     = "true"
+backup_supabase_enabled  = "false"
+backup_use_docker        = "false"
+backup_supabase_dns      = "8.8.8.8"
+backup_supabase_force_ipv4 = "true"
+backup_supabase_host_ip  = ""
+
+n8n_host     = "0.0.0.0"
+n8n_timezone = "America/Guayaquil"

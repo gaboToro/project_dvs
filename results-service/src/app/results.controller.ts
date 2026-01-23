@@ -1,11 +1,12 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
 import { getMongoDb } from './db/mongo';
 
 @Controller('results')
 export class ResultsController {
   @Get('health')
   health() {
-    return { status: 'ok', service: 'results-service' };
+    return createHealthPayload('results-service');
   }
 
   @Get(':electionId')
@@ -26,3 +27,5 @@ export class ResultsController {
     };
   }
 }
+
+

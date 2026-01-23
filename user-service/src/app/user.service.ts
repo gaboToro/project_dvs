@@ -1,109 +1,202 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import type { CreateUserRequestDto, EligibilityResponseDto, UpdateUserRequestDto, UserDto, UserRole } from '@org/contracts';
-import { randomUUID } from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { query } from './db/postgres';
 
-type InternalUser = UserDto & { passwordHash?: string };
+type UserRow = {
+  id: string;
+  username: string;
+  full_name: string;
+  email: string | null;
+  role: UserRole;
+  enabled: boolean;
+  created_at: Date | string;
+  updated_at: Date | string;
+  password_hash: string | null;
+};
 
 @Injectable()
-export class UsersService {
-  private readonly users = new Map<string, InternalUser>();
-
-  constructor() {
-    // Seed mínimo defendible (luego lo migras a BD)
-    const now = Date.now();
-    const admin: InternalUser = {
-      id: 'admin',
-      username: 'admin',
-      fullName: 'Administrador',
-      role: 'admin',
-      enabled: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    const voter: InternalUser = {
-      id: 'voter-001',
-      username: 'voter001',
-      fullName: 'Votante Demo',
-      role: 'voter',
-      enabled: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    this.users.set(admin.id, admin);
-    this.users.set(voter.id, voter);
+export class UsersService implements OnModuleInit {
+  async onModuleInit() {
+    if (process.env.SEED_DEFAULT_USERS === 'true') {
+      await this.seedIfEmpty();
+    }
   }
 
-  list(): UserDto[] {
-    return [...this.users.values()].map(this.sanitize);
+  async list(): Promise<UserDto[]> {
+    const rows = await query<UserRow>(
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users ORDER BY created_at DESC',
+    );
+    return rows.map((row) => this.mapRow(row));
   }
 
-  getById(id: string): UserDto {
-    const u = this.users.get(id);
-    if (!u) throw new NotFoundException('User not found');
-    return this.sanitize(u);
+  async getById(id: string): Promise<UserDto> {
+    const rows = await query<UserRow>(
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users WHERE id = $1',
+      [id],
+    );
+    const row = rows[0];
+    if (!row) throw new NotFoundException('User not found');
+    return this.mapRow(row);
   }
 
-  getByUsername(username: string): UserDto | undefined {
-    const found = [...this.users.values()].find(u => u.username === username);
-    return found ? this.sanitize(found) : undefined;
+  async getByUsername(username: string): Promise<UserDto | undefined> {
+    const rows = await query<UserRow>(
+      'SELECT id, username, full_name, email, role, enabled, created_at, updated_at FROM users WHERE username = $1',
+      [username],
+    );
+    const row = rows[0];
+    return row ? this.mapRow(row) : undefined;
   }
 
-  create(payload: CreateUserRequestDto): UserDto {
-    const exists = [...this.users.values()].some(u => u.username === payload.username);
-    if (exists) throw new BadRequestException('Username already exists');
+  async create(payload: CreateUserRequestDto): Promise<UserDto> {
+    const existing = await query<UserRow>('SELECT id FROM users WHERE username = $1', [payload.username]);
+    if (existing.length > 0) throw new BadRequestException('Username already exists');
 
-    const now = Date.now();
-    const id = randomUUID();
+    const passwordHash = this.hashPassword(payload.password);
 
-    const user: InternalUser = {
-      id,
-      username: payload.username,
-      fullName: payload.fullName,
-      role: payload.role as UserRole,
-      enabled: payload.enabled ?? true,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    this.users.set(id, user);
-    return this.sanitize(user);
+    const rows = await query<UserRow>(
+      `INSERT INTO users (username, full_name, email, role, enabled, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, username, full_name, email, role, enabled, created_at, updated_at`,
+      [
+        payload.username,
+        payload.fullName,
+        payload.email ?? null,
+        payload.role,
+        payload.enabled ?? true,
+        passwordHash,
+      ],
+    );
+    const row = rows[0];
+    if (!row) throw new BadRequestException('User not created');
+    return this.mapRow(row);
   }
 
-  update(id: string, payload: UpdateUserRequestDto): UserDto {
-    const u = this.users.get(id);
-    if (!u) throw new NotFoundException('User not found');
+  async update(id: string, payload: UpdateUserRequestDto): Promise<UserDto> {
+    if (payload.username) {
+      const existing = await query<UserRow>(
+        'SELECT id FROM users WHERE username = $1',
+        [payload.username],
+      );
+      if (existing.length > 0 && existing[0]?.id !== id) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
 
-    const now = Date.now();
-    const updated: InternalUser = {
-      ...u,
-      fullName: payload.fullName ?? u.fullName,
-      role: payload.role ?? u.role,
-      enabled: payload.enabled ?? u.enabled,
-      updatedAt: now,
-    };
+    const passwordHash = payload.password
+      ? this.hashPassword(payload.password)
+      : null;
 
-    this.users.set(id, updated);
-    return this.sanitize(updated);
+    const rows = await query<UserRow>(
+      `UPDATE users
+       SET username = COALESCE($2, username),
+           full_name = COALESCE($3, full_name),
+           email = COALESCE($4, email),
+           role = COALESCE($5, role),
+           enabled = COALESCE($6, enabled),
+           password_hash = COALESCE($7, password_hash),
+           updated_at = now()
+       WHERE id = $1
+       RETURNING id, username, full_name, email, role, enabled, created_at, updated_at`,
+      [
+        id,
+        payload.username ?? null,
+        payload.fullName ?? null,
+        payload.email ?? null,
+        payload.role ?? null,
+        payload.enabled ?? null,
+        passwordHash,
+      ],
+    );
+
+    const row = rows[0];
+    if (!row) throw new NotFoundException('User not found');
+    return this.mapRow(row);
   }
 
-  setEnabled(id: string, enabled: boolean): UserDto {
+  async setEnabled(id: string, enabled: boolean): Promise<UserDto> {
     return this.update(id, { enabled });
   }
 
-  eligibility(id: string): EligibilityResponseDto {
-    const u = this.users.get(id);
-    if (!u) return { id, eligible: false, reason: 'User not found' };
-    if (!u.enabled) return { id, eligible: false, reason: 'User disabled' };
-    if (u.role !== 'voter') return { id, eligible: false, reason: 'User is not voter' };
+  async eligibility(id: string): Promise<EligibilityResponseDto> {
+    const rows = await query<UserRow>('SELECT id, role, enabled FROM users WHERE id = $1', [id]);
+    const row = rows[0];
+    if (!row) return { id, eligible: false, reason: 'User not found' };
+    if (!row.enabled) return { id, eligible: false, reason: 'User disabled' };
+    if (row.role !== 'voter') return { id, eligible: false, reason: 'User is not voter' };
     return { id, eligible: true };
   }
 
-  private sanitize(u: InternalUser): UserDto {
-    // aquí eliminas campos sensibles si los agregas luego (passwordHash, etc)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash, ...safe } = u;
-    return safe;
+  async validateCredentials(username: string, password: string): Promise<UserDto> {
+    const rows = await query<UserRow>('SELECT * FROM users WHERE username = $1', [username]);
+    const row = rows[0];
+    if (!row?.password_hash) throw new UnauthorizedException('Invalid credentials');
+    if (!this.verifyPassword(password, row.password_hash)) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    if (!row.enabled) {
+      throw new UnauthorizedException('User disabled');
+    }
+    return this.mapRow(row);
+  }
+
+  private async seedIfEmpty(): Promise<void> {
+    const rows = await query<{ count: string }>('SELECT COUNT(*)::text AS count FROM users');
+    const count = Number(rows[0]?.count ?? '0');
+    if (count > 0) return;
+
+    const adminPassword = process.env.ADMIN_PASSWORD ?? 'admin123';
+    const voterPassword = process.env.VOTER_PASSWORD ?? 'voter123';
+
+    await query(
+      `INSERT INTO users (username, full_name, email, role, enabled, password_hash)
+       VALUES
+         ($1, $2, $3, 'admin', true, $4),
+         ($5, $6, $7, 'voter', true, $8)`,
+      [
+        'admin',
+        'Administrador',
+        null,
+        this.hashPassword(adminPassword),
+        'voter',
+        'Votante Demo',
+        null,
+        this.hashPassword(voterPassword),
+      ],
+    );
+  }
+
+  private mapRow(row: UserRow): UserDto {
+    return {
+      id: row.id,
+      username: row.username,
+      fullName: row.full_name,
+      email: row.email,
+      role: row.role,
+      enabled: row.enabled,
+      createdAt: this.toMillis(row.created_at),
+      updatedAt: this.toMillis(row.updated_at),
+    };
+  }
+
+  private toMillis(value: Date | string): number {
+    if (value instanceof Date) return value.getTime();
+    return new Date(value).getTime();
+  }
+
+  private hashPassword(password: string): string {
+    const salt = randomBytes(16);
+    const hash = scryptSync(password, salt, 64);
+    return `${salt.toString('hex')}:${hash.toString('hex')}`;
+  }
+
+  private verifyPassword(password: string, stored: string): boolean {
+    const [saltHex, hashHex] = stored.split(':');
+    if (!saltHex || !hashHex) return false;
+    const salt = Buffer.from(saltHex, 'hex');
+    const hash = Buffer.from(hashHex, 'hex');
+    const candidate = scryptSync(password, salt, 64);
+    return timingSafeEqual(hash, candidate);
   }
 }

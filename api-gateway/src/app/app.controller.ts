@@ -14,6 +14,11 @@ export class AppController {
     return this.appService.getHealth();
   }
 
+  @Get('api/health')
+  apiHealth() {
+    return this.appService.getHealth();
+  }
+
   @Get('me')
   async me(@Headers('authorization') authHeader?: string) {
     if (!authHeader?.startsWith('Bearer ')) {

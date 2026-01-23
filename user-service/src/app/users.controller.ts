@@ -1,5 +1,6 @@
-import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
-import type { CreateUserRequestDto, UpdateUserRequestDto } from '@org/contracts';
+import { Body, Controller, ForbiddenException, Get, Headers, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { createHealthPayload } from '@org/contracts';
+import type { CreateUserRequestDto, LoginRequestDto, UpdateUserRequestDto } from '@org/contracts';
 import { JwtAuthGuard, requireAdminOrSelf } from './authz';
 import { UsersService } from './user.service';
 
@@ -9,16 +10,16 @@ export class UsersController {
 
   @Get('health')
   health() {
-    return { status: 'ok', service: 'user-service' };
+    return createHealthPayload('user-service');
   }
 
   // Admin-only list (no admin => only self)
   @UseGuards(JwtAuthGuard)
   @Get()
-  list(@Req() req: any) {
+  async list(@Req() req: any) {
     const roles = req.user?.roles ?? [];
     if (!roles.includes('admin')) {
-      return [this.users.getById(req.user.sub)];
+      return [await this.users.getById(req.user.sub)];
     }
     return this.users.list();
   }
@@ -26,7 +27,7 @@ export class UsersController {
   // Admin or self
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  get(@Req() req: any, @Param('id') id: string) {
+  async get(@Req() req: any, @Param('id') id: string) {
     requireAdminOrSelf(req, id);
     return this.users.getById(id);
   }
@@ -34,7 +35,7 @@ export class UsersController {
   // Admin-only create
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(
+  async create(
     @Req() req: any,
     @Body(new ValidationPipe({ whitelist: true, transform: true })) body: CreateUserRequestDto,
   ) {
@@ -46,7 +47,7 @@ export class UsersController {
   // Admin or self update
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
+  async update(
     @Req() req: any,
     @Param('id') id: string,
     @Body(new ValidationPipe({ whitelist: true, transform: true })) body: UpdateUserRequestDto,
@@ -55,7 +56,7 @@ export class UsersController {
     const roles = req.user?.roles ?? [];
     if (!roles.includes('admin')) {
       // user normal: solo puede actualizar fullName
-      return this.users.update(id, { fullName: body.fullName });
+      return this.users.update(id, { fullName: body.fullName, email: body.email });
     }
     return this.users.update(id, body);
   }
@@ -63,8 +64,20 @@ export class UsersController {
   // Elegibilidad
   @UseGuards(JwtAuthGuard)
   @Get(':id/eligible')
-  eligible(@Req() req: any, @Param('id') id: string) {
+  async eligible(@Req() req: any, @Param('id') id: string) {
     requireAdminOrSelf(req, id);
     return this.users.eligibility(id);
   }
+
+  @Post('validate')
+  async validate(
+    @Headers('x-internal-token') token: string | undefined,
+    @Body(new ValidationPipe({ whitelist: true, transform: true })) body: LoginRequestDto,
+  ) {
+    const expected = process.env.INTERNAL_SERVICE_TOKEN;
+    if (!expected || token !== expected) throw new ForbiddenException('Invalid internal token');
+    return this.users.validateCredentials(body.username, body.password);
+  }
 }
+
+

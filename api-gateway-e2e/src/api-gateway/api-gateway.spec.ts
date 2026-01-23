@@ -1,10 +1,13 @@
+// test e2e / e2e test
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 
+// Suite: api-gateway e2e - agrupa pruebas relacionadas / Suite: api-gateway e2e - grouping of related tests
 describe('api-gateway e2e', () => {
   let app: INestApplication;
   let baseUrl: string;
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-secret';
     const { AppModule } = require('@org/api-gateway');
@@ -23,10 +26,12 @@ describe('api-gateway e2e', () => {
     baseUrl = `http://127.0.0.1:${address.port}`;
   });
 
+  // Limpieza (afterAll) - limpia el estado y los mocks / Teardown (afterAll) - cleanup state and mocks
   afterAll(async () => {
     await app.close();
   });
 
+  // Caso de prueba: returns health payload - comportamiento esperado bajo condiciones especificas / Test case: returns health payload - expected behavior under specific conditions
   it('returns health payload', async () => {
     const res = await fetch(`${baseUrl}/health`);
     const body = await res.json();

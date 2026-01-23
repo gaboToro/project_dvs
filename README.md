@@ -13,6 +13,8 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - Elections persist in Supabase.
 - Votes are anchored to an in-memory blockchain and published to Kafka.
 - Results service consumes Kafka and updates Mongo read model.
+- Dashboard service consumes Kafka and streams realtime results over WebSockets.
+- Audit log service stores security-relevant events in Postgres.
 
 ## Services
 - api-gateway (3000)
@@ -20,8 +22,13 @@ Nx monorepo of NestJS microservices for a digital voting demo. The system suppor
 - voting-service (3002)
 - blockchain-service (3003)
 - results-service (3004)
+- dashboard-service (3008)
 - user-service (3005)
 - election-service (3006)
+- audit-log-service (3007)
+- email-notifier-service (3009)
+- reporting-service (3012)
+- scheduler-backup-service (3011)
 
 ## Frontend app (Expo)
 Single Expo app lives under `apps/dvs-app` with voter, admin, and results flows.
@@ -49,6 +56,16 @@ API base URL:
      - SUPABASE_URL
      - SUPABASE_SERVICE_ROLE_KEY
    - Mongo credentials in .env match docker-compose (user: dvs_user, pass: dvs_pass_123).
+   - SMTP (email-notifier-service):
+     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE, SMTP_FROM
+   - Scheduler backup:
+     - BACKUP_DIR, BACKUP_CRON, BACKUP_PG_ENABLED, BACKUP_MONGO_ENABLED, BACKUP_SUPABASE_ENABLED
+    - BACKUP_USE_DOCKER, BACKUP_PG_CONTAINER, BACKUP_MONGO_CONTAINER
+     - BACKUP_SUPABASE_DNS, BACKUP_SUPABASE_FORCE_IPV4, BACKUP_SUPABASE_HOST_IP
+     - SUPABASE_PG_URI (Supabase connection string)
+     - BACKUP_REMOTE_COMMAND (Cloudflare Access SSH or SCP)
+     - Example BACKUP_REMOTE_COMMAND (2 destinations):
+       - scp -o "ProxyCommand=cloudflared access ssh --hostname server.distribuidauce.org" $env:BACKUP_FILES distribuida@server.distribuidauce.org:~/Documents/distribuida1/toro_gabriel/prod/ && scp -o "ProxyCommand=cloudflared access ssh --hostname server.distribuidauce.org" $env:BACKUP_FILES distribuida@server.distribuidauce.org:~/Documents/distribuida1/toro_gabriel/qa/
 
 4) Apply Supabase migration
    - Run `supabase/migrations/20251230065442_remote_schema.sql` in Supabase SQL Editor.
@@ -59,7 +76,12 @@ API base URL:
    - npx nx serve blockchain-service
    - npx nx serve voting-service
    - npx nx serve results-service
+   - npx nx serve dashboard-service
    - npx nx serve election-service
+   - npx nx serve audit-log-service
+   - npx nx serve email-notifier-service
+   - npx nx serve reporting-service
+   - npx nx serve scheduler-backup-service
    - npx nx serve api-gateway
 
 ## Demo flow (via API Gateway)
@@ -96,6 +118,12 @@ API base URL:
 - POST http://localhost:3000/api/elections/:id/candidates (admin)
 - DELETE http://localhost:3000/api/elections/:id/candidates/:candidateId (admin)
 
+## Audit log service
+- Health: GET http://localhost:3007/api/audit/health
+- Ingest: POST http://localhost:3007/api/audit/log
+  - Uses header `x-internal-token` when `INTERNAL_SERVICE_TOKEN` is set.
+  - Stores data in Postgres `audit_logs`.
+
 ## Testing
 ### Unit + functional
 - Run all tests: `npm run test:all`
@@ -112,3 +140,10 @@ API base URL:
 
 ## Notes
 - results-service consumes votes from Kafka. If Kafka is down, results will not update.
+- users.email is optional and can be updated by the user profile.
+- email-notifier-service consumes RabbitMQ queue `emails.send` and sends SMTP emails.
+- reporting-service exposes CSV export at `/api/reports/elections.csv` (sync) and async jobs at:
+  - POST `/api/reports/elections` -> `{ jobId }`
+  - GET `/api/reports/:jobId`
+  - GET `/api/reports/:jobId/download`
+- scheduler-backup-service runs scheduled backups and exposes `/api/backup/run` (internal).

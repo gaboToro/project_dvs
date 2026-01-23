@@ -1,40 +1,77 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { BackButton } from '@/components/BackButton';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { ProfileMenu } from '@/components/ProfileMenu';
 import { Screen } from '@/components/Screen';
-import { clearToken, getRole } from '@/lib/auth';
+import { apiRequest } from '@/lib/api';
+import { decodeJwtSubject, getRole, getToken } from '@/lib/auth';
 import { theme } from '@/lib/theme';
+
+type UserProfile = {
+  fullName?: string | null;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
   const [role, setRole] = useState<'admin' | 'voter' | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
 
   useEffect(() => {
-    getRole().then((stored) => setRole(stored as 'admin' | 'voter' | null));
+    getRole().then((stored) => {
+      const nextRole = stored as 'admin' | 'voter' | null;
+      setRole(nextRole);
+      if (nextRole === 'voter') {
+        router.replace('/voter/results-live');
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadProfile = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const userId = decodeJwtSubject(token);
+        if (!userId) return;
+        const data = await apiRequest<UserProfile>(`/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!active) return;
+        setFullName(data?.fullName ?? null);
+      } catch {
+        if (active) setFullName(null);
+      }
+    };
+    loadProfile();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const showAdmin = useMemo(() => role === 'admin', [role]);
   const showVoter = useMemo(() => role === 'voter', [role]);
   const showResults = useMemo(() => role === 'voter', [role]);
-
-  const handleLogout = async () => {
-    await clearToken();
-    router.replace('/login');
-  };
+  const showAdminLive = useMemo(() => role === 'admin', [role]);
 
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>Panel principal</Text>
-        <Text style={styles.subtitle}>
-          Selecciona el modulo que quieres utilizar en esta demo.
-        </Text>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Panel principal</Text>
+          <Text style={styles.welcome}>
+            BIENVENID@{fullName ? ` ${fullName}` : ''}
+          </Text>
+          <Text style={styles.subtitle}>
+            Selecciona el módulo que quieres utilizar en Digital Voting System.
+          </Text>
+        </View>
+        <ProfileMenu fullName={fullName} />
       </View>
 
-      <View style={styles.cards}>
+      <ScrollView contentContainerStyle={styles.cards}>
         {showVoter ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Votante</Text>
@@ -50,13 +87,105 @@ export default function HomeScreen() {
         ) : null}
         {showAdmin ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Administracion</Text>
+            <Text style={styles.cardTitle}>Administración de Elecciones</Text>
             <Text style={styles.cardText}>
               Gestiona elecciones, candidatos y estados.
             </Text>
             <PrimaryButton
-              label="Ir a admin"
+              label="Administrar"
               onPress={() => router.push('/admin/elections')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Usuarios</Text>
+            <Text style={styles.cardText}>
+              Administra accesos y roles de los votantes.
+            </Text>
+            <PrimaryButton
+              label="Gestionar usuarios"
+              onPress={() => router.push('/admin/users')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Auditoría</Text>
+            <Text style={styles.cardText}>
+              Revisa la actividad y los eventos registrados.
+            </Text>
+            <PrimaryButton
+              label="Ver auditoría"
+              onPress={() => router.push('/admin/audit')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Reportes</Text>
+            <Text style={styles.cardText}>
+              Genera y descarga reportes del sistema.
+            </Text>
+            <PrimaryButton
+              label="Ir a reportes"
+              onPress={() => router.push('/admin/reports')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Monitoreo</Text>
+            <Text style={styles.cardText}>
+              Estado de salud de los microservicios.
+            </Text>
+            <PrimaryButton
+              label="Ver monitoreo"
+              onPress={() => router.push('/admin/health')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Respaldos</Text>
+            <Text style={styles.cardText}>
+              Ejecuta y revisa respaldos del sistema.
+            </Text>
+            <PrimaryButton
+              label="Ver respaldos"
+              onPress={() => router.push('/admin/backup')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdmin ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Blockchain</Text>
+            <Text style={styles.cardText}>
+              Verifica la integridad y el estado de la cadena.
+            </Text>
+            <PrimaryButton
+              label="Ver blockchain"
+              onPress={() => router.push('/admin/blockchain')}
+              variant="soft"
+            />
+          </View>
+        ) : null}
+        {showAdminLive ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Resultados en vivo</Text>
+            <Text style={styles.cardText}>
+              Monitoreo del conteo en tiempo real por elección.
+            </Text>
+            <PrimaryButton
+              label="Ver en vivo"
+              onPress={() => router.push('/admin/results-live')}
               variant="soft"
             />
           </View>
@@ -65,7 +194,7 @@ export default function HomeScreen() {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Resultados</Text>
             <Text style={styles.cardText}>
-              Consulta el cierre de cada eleccion.
+              Consulta el cierre de cada elección.
             </Text>
             <PrimaryButton
               label="Ver resultados"
@@ -74,11 +203,7 @@ export default function HomeScreen() {
             />
           </View>
         ) : null}
-      </View>
-
-      <View style={styles.footer}>
-        <PrimaryButton label="Cerrar sesion" onPress={handleLogout} variant="ghost" />
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -86,6 +211,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   header: {
     marginTop: 16,
+    gap: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
     gap: 8,
   },
   title: {
@@ -93,13 +225,21 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
     fontSize: 26,
   },
+  welcome: {
+    fontFamily: theme.fonts.subheading,
+    color: theme.colors.accentDark,
+    fontSize: 14,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   subtitle: {
     fontFamily: theme.fonts.body,
     color: theme.colors.slate,
     fontSize: 14,
   },
   cards: {
-    marginTop: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
     gap: 14,
   },
   card: {

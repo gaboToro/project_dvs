@@ -1,3 +1,4 @@
+// test funcional / functional test
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -7,11 +8,13 @@ jest.mock('./db/mongo', () => ({
   getMongoDb: jest.fn(),
 }));
 
+// Suite: ResultsService functional - agrupa pruebas relacionadas / Suite: ResultsService functional - grouping of related tests
 describe('ResultsService functional', () => {
   let app: INestApplication;
   let baseUrl: string;
   const getMongoDbMock = getMongoDb as jest.Mock;
 
+  // Preparacion (beforeAll) - prepara el estado y los mocks / Setup (beforeAll) - prepare test state and mocks
   beforeAll(async () => {
     const collection = {
       findOne: jest.fn().mockResolvedValue({
@@ -40,10 +43,12 @@ describe('ResultsService functional', () => {
     baseUrl = `http://127.0.0.1:${address.port}`;
   });
 
+  // Limpieza (afterAll) - limpia el estado y los mocks / Teardown (afterAll) - cleanup state and mocks
   afterAll(async () => {
     await app.close();
   });
 
+  // Caso de prueba: returns results from Mongo - comportamiento esperado bajo condiciones especificas / Test case: returns results from Mongo - expected behavior under specific conditions
   it('returns results from Mongo', async () => {
     const res = await fetch(`${baseUrl}/api/results/e1`);
     const body = (await res.json()) as {

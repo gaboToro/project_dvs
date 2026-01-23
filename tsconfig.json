@@ -47,6 +47,42 @@
     },
     {
       "path": "./election-service"
+    },
+    {
+      "path": "./audit-log-service-e2e"
+    },
+    {
+      "path": "./audit-log-service"
+    },
+    {
+      "path": "./rate-limiter-service-e2e"
+    },
+    {
+      "path": "./rate-limiter-service"
+    },
+    {
+      "path": "./dashboard-service"
+    },
+    {
+      "path": "./dashboard-service-e2e"
+    },
+    {
+      "path": "./email-notifier-service-e2e"
+    },
+    {
+      "path": "./email-notifier-service"
+    },
+    {
+      "path": "./reporting-service-e2e"
+    },
+    {
+      "path": "./reporting-service"
+    },
+    {
+      "path": "./scheduler-backup-service-e2e"
+    },
+    {
+      "path": "./scheduler-backup-service"
     }
   ]
 }

@@ -73,3 +73,4 @@ override.tf.json
 # Nota: Algunos equipos prefieren subirlo para asegurar versiones, 
 # pero si estás aprendiendo o en laboratorios, puedes ignorarlo.
 .terraform.lock.hcl
+backups/
