@@ -59,6 +59,8 @@ locals {
     AUDIT_LOGGER_ENABLED=${var.audit_logger_enabled}
     AUDIT_LOGGER_TIMEOUT_MS=${var.audit_logger_timeout_ms}
 
+    USER_SERVICE_URL=http://user-service:3005
+
     SMTP_HOST=${var.smtp_host}
     SMTP_PORT=${var.smtp_port}
     SMTP_SECURE=${var.smtp_secure}
@@ -83,9 +85,9 @@ locals {
 
   identity_env = <<-ENV
     CORS_ORIGINS=${var.cors_origins}
-    AUTH_SERVICE_URL=http://localhost:3001
-    USER_SERVICE_URL=http://localhost:3005
-    RATE_LIMITER_URL=http://localhost:3010
+    AUTH_SERVICE_URL=http://auth-service:3001
+    USER_SERVICE_URL=http://user-service:3005
+    RATE_LIMITER_URL=http://rate-limiter-service:3010
 
     VOTING_SERVICE_URL=http://${var.business_private_ip}:3002
     BLOCKCHAIN_SERVICE_URL=http://${var.business_private_ip}:3003
@@ -489,15 +491,12 @@ resource "aws_route_table_association" "public_b" {
 }
 
 resource "aws_security_group" "dvs_qa" {
-  name        = "${var.project_name}-${var.environment}-sg"
-  description = "QA security group with open intra-VPC access"
+  name_prefix = "${var.project_name}-${var.environment}-sg-"
+  description = "App security group with open intra-VPC access"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip_cidr]
+  lifecycle {
+    create_before_destroy = true
   }
 
   ingress {
@@ -519,6 +518,13 @@ resource "aws_security_group" "dvs_qa" {
     to_port     = 5678
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port                = 22
+    to_port                  = 22
+    protocol                 = "tcp"
+    security_groups          = [aws_security_group.bastion.id]
   }
 
   ingress {
@@ -544,6 +550,30 @@ resource "aws_security_group" "dvs_qa" {
 
   tags = {
     Name = "${var.project_name}-${var.environment}-sg"
+  }
+}
+
+resource "aws_security_group" "bastion" {
+  name        = "${var.project_name}-${var.environment}-bastion-sg"
+  description = "Bastion SSH access"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion-sg"
   }
 }
 
@@ -574,6 +604,32 @@ resource "aws_security_group" "alb" {
 resource "aws_key_pair" "main" {
   key_name   = "${var.project_name}-${var.environment}-key"
   public_key = var.ssh_public_key
+}
+
+resource "aws_instance" "bastion" {
+  ami                         = data.aws_ami.al2023.id
+  instance_type               = var.instance_type_services
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
+  key_name                    = aws_key_pair.main.key_name
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion"
+  }
+}
+
+resource "aws_eip" "bastion" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion-eip"
+  }
+}
+
+resource "aws_eip_association" "bastion" {
+  instance_id   = aws_instance.bastion.id
+  allocation_id = aws_eip.bastion.id
 }
 
 resource "aws_instance" "core" {
@@ -684,7 +740,7 @@ resource "aws_lb_target_group" "api" {
   target_type = "instance"
 
   health_check {
-    path                = "/"
+    path                = "/api/health"
     protocol            = "HTTP"
     port                = "3000"
     healthy_threshold   = 2
