@@ -38,6 +38,11 @@ variable "ssh_public_key" {
   description = "Public SSH key material for the EC2 key pair."
 }
 
+variable "site24x7_key" {
+  type        = string
+  description = "Site24x7 Linux agent key."
+}
+
 variable "instance_type_core" {
   type    = string
   default = "t3.medium"
