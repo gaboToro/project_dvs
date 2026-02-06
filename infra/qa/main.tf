@@ -100,6 +100,13 @@ locals {
     SCHEDULER_BACKUP_SERVICE_URL=http://${var.trust_support_private_ip}:3011
   ENV
 
+  business_env = <<-ENV
+    ELECTION_SERVICE_URL=http://${var.business_private_ip}:3006
+    BLOCKCHAIN_SERVICE_URL=http://${var.business_private_ip}:3003
+    AUDIT_LOG_SERVICE_URL=http://${var.trust_support_private_ip}:3007
+    EMAIL_NOTIFIER_SERVICE_URL=http://${var.trust_support_private_ip}:3009
+  ENV
+
   user_data_core = <<-EOF
     #!/bin/bash
     set -e
@@ -258,6 +265,7 @@ locals {
         image: ${var.image_repo_prefix}/auth-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/identity.env
         environment:
           PORT: "3001"
         ports:
@@ -305,12 +313,17 @@ locals {
     ${local.common_env}
     ENV
 
+    cat > /opt/dvs/business.env <<'ENV'
+    ${local.business_env}
+    ENV
+
     cat > /opt/dvs/docker-compose.yml <<'YAML'
     services:
       election-service:
         image: ${var.image_repo_prefix}/election-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/business.env
         environment:
           PORT: "3006"
         ports:
@@ -321,6 +334,7 @@ locals {
         image: ${var.image_repo_prefix}/voting-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/business.env
         environment:
           PORT: "3002"
         ports:
@@ -331,6 +345,7 @@ locals {
         image: ${var.image_repo_prefix}/results-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/business.env
         environment:
           PORT: "3004"
         ports:
@@ -341,6 +356,7 @@ locals {
         image: ${var.image_repo_prefix}/blockchain-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/business.env
         environment:
           PORT: "3003"
         ports:
@@ -351,6 +367,7 @@ locals {
         image: ${var.image_repo_prefix}/reporting-service:${var.image_tag}
         env_file:
           - /opt/dvs/common.env
+          - /opt/dvs/business.env
         environment:
           PORT: "3012"
         ports:
@@ -655,7 +672,7 @@ resource "aws_lb_target_group" "api" {
   target_type = "instance"
 
   health_check {
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     port                = "3000"
     healthy_threshold   = 2
@@ -677,7 +694,7 @@ resource "aws_lb_target_group" "frontend" {
   target_type = "instance"
 
   health_check {
-    path                = "/"
+    path                = "/index.html"
     protocol            = "HTTP"
     port                = "80"
     healthy_threshold   = 2
@@ -773,3 +790,6 @@ resource "aws_lb_target_group_attachment" "trust_support_dashboard" {
   target_id        = aws_instance.trust_support.id
   port             = 3008
 }
+
+
+
